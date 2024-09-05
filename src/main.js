@@ -1,8 +1,8 @@
-import { Boot } from './scenes/Boot';
-import { ClickerGame } from './scenes/StartGame';
 import { Game } from 'phaser';
+import { Boot } from './scenes/Boot';
+import { HomeGame } from './scenes/HomeGame';
+import { StartGame } from './scenes/StartGame';
 import { GameOver } from './scenes/GameOver';
-import { MainMenu } from './scenes/HomeGame';
 import { Preloader } from './scenes/Preloader';
 
 const config = {
@@ -24,8 +24,8 @@ const config = {
     scene: [
         Boot,
         Preloader,
-        MainMenu,
-        ClickerGame,
+        HomeGame,
+        StartGame,
         GameOver
     ]
 };

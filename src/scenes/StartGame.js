@@ -1,9 +1,9 @@
 import { Scene } from 'phaser';
 import { Noise } from 'noisejs'; // Make sure to import a Perlin noise library
 
-export class ClickerGame extends Scene {
+export class StartGame extends Scene {
     constructor() {
-        super('ClickerGame');
+        super('StartGame');
         this.noise = new Noise(Math.random()); // Initialize the Perlin noise generator with a random seed
         this.noiseOffset = 0; // Starting noise offset
     }
