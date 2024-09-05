@@ -1,0 +1,17 @@
+{
+  "name": "card-memory",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  },
+  "dependencies": {
+    "noisejs": "^2.1.0",
+    "phaser": "^3.80.1"
+  }
+}
