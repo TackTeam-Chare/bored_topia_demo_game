@@ -18,9 +18,10 @@ export class MainMenu extends Scene {
     create() {
 
         const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
-        bg.setScale(Math.max(this.sys.game.config.width / bg.width, this.sys.game.config.height / bg.height));
+        // bg.setScale(Math.max(this.sys.game.config.width / bg.width, this.sys.game.config.height / bg.height));
+        bg.setDisplaySize(this.scale.width, this.scale.height);
 
-        const logo = this.add.image(512, 400, 'logo').setScale(0.25);
+        const logo = this.add.image(this.sys.game.config.width / 2, 400, 'logo').setScale(0.25);
         this.tweens.add({
             targets: logo,
             y: 290,
@@ -30,14 +31,11 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        const startButtonScale = Math.min(this.sys.game.config.width / 800, this.sys.game.config.height / 600) * 2.5;
+        const startButtonScale = Math.min(this.sys.game.config.width / 800, this.sys.game.config.height / 600) * 2.0;
 
-        const startButton = this.add.image(this.sys.game.config.width / 2, this.sys.game.config.height - 100, 'Start1')
+        const startButton = this.add.image(this.sys.game.config.width / 2, this.sys.game.config.height - 150, 'Start1')
             .setInteractive()
             .setScale(startButtonScale);
-
-        const marginBottom = 30;
-        startButton.setPosition(this.sys.game.config.width / 2, this.sys.game.config.height - startButton.displayHeight / 2 - marginBottom);
 
         const pulsingTween = this.tweens.add({
             targets: startButton,
@@ -74,6 +72,7 @@ export class MainMenu extends Scene {
         });
 
         startButton.on('pointerdown', () => {
+
             this.time.delayedCall(500, () => {
                 startButton.setTexture('Start2');
             });

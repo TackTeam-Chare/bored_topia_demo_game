@@ -19,14 +19,12 @@ export class ClickerGame extends Scene {
         this.score = 0;
         this.coins = [];
 
-        // Add background image
         const bg = this.add.image(0, 0, 'PlayPage').setOrigin(0, 0);
-        bg.setDisplaySize(this.sys.game.config.width, this.sys.game.config.height);
 
-        // Add Coin Dispenser with an animation effect
-        const coinDispenser = this.add.image(512, 330, 'CoinDispenser').setScale(0.15); // Adjusted dispenser position
+        bg.setDisplaySize(this.scale.width, this.scale.height);
 
-        // Animation for coin dispenser
+        const coinDispenser = this.add.image(512, 330, 'CoinDispenser').setScale(0.15);
+
         this.tweens.add({
             targets: coinDispenser,
             y: 170,
@@ -51,7 +49,7 @@ export class ClickerGame extends Scene {
         this.scoreText = this.add.text(scoreBg.x, scoreBg.y, '0', textStyle).setOrigin(0.5).setDepth(1);
         this.timeText = this.add.text(timeBg.x, timeBg.y, '10', textStyle).setOrigin(0.3).setDepth(1);
 
-        const playButton = this.add.image(512, 1650, 'Play')
+        const playButton = this.add.image(512, 1450, 'Play')
             .setInteractive()
             .setScale(0.2);
 
