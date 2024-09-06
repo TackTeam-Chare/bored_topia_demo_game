@@ -16,12 +16,10 @@ export class MainMenu extends Scene {
     }
 
     create() {
-
         const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
-        // bg.setScale(Math.max(this.sys.game.config.width / bg.width, this.sys.game.config.height / bg.height));
-        bg.setDisplaySize(this.scale.width, this.scale.height);
+        bg.setDisplaySize(this.scale.width, this.scale.height); // ปรับ background ให้เต็มหน้าจอ
 
-        const logo = this.add.image(this.sys.game.config.width / 2, 400, 'logo').setScale(0.25);
+        const logo = this.add.image(this.scale.width / 2, 400, 'logo').setScale(0.25);
         this.tweens.add({
             targets: logo,
             y: 290,
@@ -31,11 +29,17 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        const startButtonScale = Math.min(this.sys.game.config.width / 800, this.sys.game.config.height / 600) * 2.0;
+        // ปรับขนาดปุ่ม Start ให้เล็กลงและ responsive
+        const startButtonScale = Math.min(this.scale.width / 800, this.scale.height / 600) * 1.5; // ปรับสัดส่วนลดลง
 
-        const startButton = this.add.image(this.sys.game.config.width / 2, this.sys.game.config.height - 150, 'Start1')
+        // เพิ่ม margin-bottom ให้กับปุ่ม Start
+        const marginBottom = 50;
+
+        const startButton = this.add.image(this.scale.width / 2, this.scale.height - marginBottom, 'Start1')
             .setInteractive()
-            .setScale(startButtonScale);
+            .setScale(startButtonScale); // ปรับขนาดของปุ่ม
+
+        startButton.setPosition(this.scale.width / 2, this.scale.height - startButton.displayHeight / 2 - marginBottom);
 
         const pulsingTween = this.tweens.add({
             targets: startButton,
@@ -72,7 +76,6 @@ export class MainMenu extends Scene {
         });
 
         startButton.on('pointerdown', () => {
-
             this.time.delayedCall(500, () => {
                 startButton.setTexture('Start2');
             });
