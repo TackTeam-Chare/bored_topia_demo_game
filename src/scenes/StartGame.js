@@ -147,20 +147,21 @@ export class ClickerGame extends Scene {
                 weight: 2
             }
         ];
-
+    
         const randomCoinType = this.weightedRandom(coinTypes);
 
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
 
+        coin.setScale(1.5);
+    
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
-
+    
         const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
         const velocityY = speed * Math.sin(Phaser.Math.DegToRad(angle));
-
+    
         coin.setVelocity(velocityX, velocityY);
-
-
+    
         coin.setCollideWorldBounds(true);
         coin.setBounce(0);
 
@@ -170,13 +171,13 @@ export class ClickerGame extends Scene {
                 coin.destroy();
             }
         });
-
+    
         coin.setInteractive();
         coin.coinType = randomCoinType;
-
-        // Add coin to the coins array
+    
         this.coins.push(coin);
     }
+    
 
     weightedRandom(coinTypes) {
         const totalWeight = coinTypes.reduce((acc, coin) => acc + coin.weight, 0);
@@ -195,11 +196,10 @@ export class ClickerGame extends Scene {
     clickCoin(coin) {
 
         coin.disableInteractive();
-
         coin.setVelocity(0, 0);
-
+    
         coin.play(coin.coinType.vanishAnim);
-
+   
         switch (coin.coinType.key) {
             case 'coinBonze':
                 this.sound.play('coin_Bonze');
@@ -217,15 +217,34 @@ export class ClickerGame extends Scene {
                 this.sound.play('coin_Gold');
         }
 
+        const scoreText = this.add.text(coin.x, coin.y, `+${coin.coinType.score}`, {
+            fontFamily: 'Arial Black',
+            fontSize: '40px',
+            color: '#FFD700',
+            stroke: '#000000',
+            strokeThickness: 6
+        }).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: scoreText,
+            y: coin.y - 50,   
+            alpha: 0,        
+            scale: { from: 1, to: 1.5 },
+            duration: 1000,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                scoreText.destroy();
+            }
+        });
+
         coin.once('animationcomplete-' + coin.coinType.vanishAnim, () => coin.destroy());
 
         this.score += coin.coinType.score;
-
         this.scoreText.setText(this.score.toString());
 
         this.dropCoin();
-
     }
+    
 
     update() {
 
