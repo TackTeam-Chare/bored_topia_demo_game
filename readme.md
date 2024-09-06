@@ -1,4 +1,4 @@
-# demo bored topia game 
+# demo bored topia game
 
 This is a simple coin clicker game. The goal is to click the coin as many times as possible in the time limit.
 
@@ -9,8 +9,8 @@ This is a simple coin clicker game. The goal is to click the coin as many times 
 3. Start the development server with `npm run dev`.
 4. If you want to build the project, run `npm run build`.
 
-
 ![screenshot]
 (screenshot_home.png)
-(screenshot_start.png)
-(screenshot_end.png)"# bored_topia_demo_game" 
+(screenshot_how_to_play.png)
+(screenshot_play_game.png)
+(screenshot_level_complete.png)

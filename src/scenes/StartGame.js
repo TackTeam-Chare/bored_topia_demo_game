@@ -1,15 +1,14 @@
 import { Scene } from 'phaser';
-import { Noise } from 'noisejs'; // Make sure to import a Perlin noise library
+import { Noise } from 'noisejs';
 
-export class StartGame extends Scene {
+export class ClickerGame extends Scene {
     constructor() {
-        super('StartGame');
-        this.noise = new Noise(Math.random()); // Initialize the Perlin noise generator with a random seed
-        this.noiseOffset = 0; // Starting noise offset
+        super('ClickerGame');
+        this.noise = new Noise(Math.random());
+        this.noiseOffset = 0;
     }
 
     preload() {
-        // Load audio files for different coins
         this.load.audio('coin_Bonze', 'assets/sounds/coin_Bonze.mp3');
         this.load.audio('coin_Gold_X', 'assets/sounds/coin_Gold_X.mp3');
         this.load.audio('coin_Gold', 'assets/sounds/coin_Gold.mp3');
@@ -21,84 +20,157 @@ export class StartGame extends Scene {
         this.coins = [];
 
         // Add background image
-        this.add.image(512, 384, 'background');
+        const bg = this.add.image(0, 0, 'PlayPage').setOrigin(0, 0);
+        bg.setDisplaySize(this.sys.game.config.width, this.sys.game.config.height);
 
-        // Add a background for the score text (adjust the size of the image to fit the text)
-        const scoreBg = this.add.image(120, 45, 'Bar_coin').setScale(0.6).setAlpha(0.9);
+        // Add Coin Dispenser with an animation effect
+        const coinDispenser = this.add.image(512, 330, 'CoinDispenser').setScale(0.15); // Adjusted dispenser position
 
-        // Add a background for the time text
-        const timeBg = this.add.image(935, 45, 'Bar_time').setScale(0.6).setAlpha(0.9);
+        // Animation for coin dispenser
+        this.tweens.add({
+            targets: coinDispenser,
+            y: 170,
+            ease: 'Power1',
+            duration: 1000,
+            yoyo: true,
+            repeat: -1
+        });
 
-        // Define text style with appropriate size and positioning
+        const topMargin = 30;
+        const timeBg = this.add.image(120, 60 + topMargin, 'Clock').setDisplaySize(220, 75).setAlpha(1);
+        const scoreBg = this.add.image(900, 60 + topMargin, 'Score').setDisplaySize(200, 75).setAlpha(1);
+
         const textStyle = {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '30px',
             color: '#ffffff',
             stroke: '#000000',
-            strokeThickness: 6,
-            shadow: {
-                offsetX: 1,
-                offsetY: 1,
-                color: '#000000',
-                blur: 1,
-                stroke: true,
-                fill: true
-            }
+            strokeThickness: 6
         };
 
-        this.scoreText = this.add.text(scoreBg.x, scoreBg.y, '0', textStyle).setOrigin(0.4).setDepth(1);
-        this.timeText = this.add.text(timeBg.x, timeBg.y, '10', textStyle).setOrigin(0.4).setDepth(1);
+        this.scoreText = this.add.text(scoreBg.x, scoreBg.y, '0', textStyle).setOrigin(0.5).setDepth(1);
+        this.timeText = this.add.text(timeBg.x, timeBg.y, '10', textStyle).setOrigin(0.3).setDepth(1);
+
+        const playButton = this.add.image(512, 1650, 'Play')
+            .setInteractive()
+            .setScale(0.2);
+
+        playButton.on('pointerover', () => {
+            playButton.setScale(0.2);
+        });
+
+        playButton.on('pointerout', () => {
+            playButton.setScale(0.175);
+        });
+
+        playButton.on('pointerdown', () => {
+            this.scene.start('ClickerGame');
+        });
 
         // 10-second timer
-        this.timer = this.time.addEvent({ delay: 10000, callback: () => this.gameOver() });
+        this.timer = this.time.addEvent({
+            delay: 10000,
+            callback: () => this.gameOver()
+        });
 
-        // Set physics world bounds
         this.physics.world.setBounds(0, -400, 1024, 768 + 310);
 
-        // Drop initial set of coins
-        for (let i = 0; i < 32; i++) {
-            this.dropCoin();
-        }
+        this.scheduleNextCoinDrop();
 
-        // Set up click handler for coins
+
         this.input.on('gameobjectdown', (pointer, gameObject) => this.clickCoin(gameObject));
     }
 
+    scheduleNextCoinDrop() {
+        const delay = Phaser.Math.Between(500, 3000);
+        this.time.delayedCall(delay, () => {
+
+            const coinCount = Phaser.Math.Between(1, 10); 
+            for (let i = 0; i < coinCount; i++) {
+                this.dropCoin();
+            }
+            this.scheduleNextCoinDrop();
+        });
+    }
+
     dropCoin() {
-        // Increment noise offset to get different noise values over time
+
         this.noiseOffset += 0.1;
 
-        // Use Perlin noise to calculate positions and velocities
-        const noiseValueX = this.noise.perlin2(this.noiseOffset, 0);
-        const noiseValueY = this.noise.perlin2(0, this.noiseOffset);
+        const dispenserX = 512;
+        const dispenserY = 330;
 
-        const x = Phaser.Math.Between(128, 896);
-        const y = Phaser.Math.Between(-100, -400); // Coins start off-screen for a smooth drop
+        const x = dispenserX + Phaser.Math.Between(-30, 30);
+        const y = dispenserY + Phaser.Math.Between(-10, 10);
 
-        // Define coin types, animations, and their probabilities
         const coinTypes = [
-            { key: 'coin', rotateAnim: 'rotate', vanishAnim: 'vanish', score: 1, weight: 50 },
-            { key: 'coinBonze', rotateAnim: 'Bonze_rotate', vanishAnim: 'Bonze_vanish', score: 2, weight: 30 },
-            { key: 'coinSilver', rotateAnim: 'Silver_rotate', vanishAnim: 'Silver_vanish', score: 5, weight: 10 },
-            { key: 'coinGoldx2', rotateAnim: 'Goldx2_rotate', vanishAnim: 'Goldx2_vanish', score: 10, weight: 5 },
-            { key: 'coinGoldx3', rotateAnim: 'Goldx3_rotate', vanishAnim: 'Goldx3_vanish', score: 20, weight: 3 },
-            { key: 'coinGoldx4', rotateAnim: 'Goldx4_rotate', vanishAnim: 'Goldx4_vanish', score: 50, weight: 2 },
-            { key: 'coinGoldx5', rotateAnim: 'Goldx5_rotate', vanishAnim: 'Goldx5_vanish', score: 100, weight: 1 }
+            {
+                key: 'coinBonze',
+                rotateAnim: 'Bonze_rotate',
+                vanishAnim: 'Bonze_vanish',
+                score: 1,
+                weight: 50
+            },
+            {
+                key: 'coinSilver',
+                rotateAnim: 'Silver_rotate',
+                vanishAnim: 'Silver_vanish',
+                score: 2,
+                weight: 30
+            },
+            {
+                key: 'coinGoldx2',
+                rotateAnim: 'Goldx2_rotate',
+                vanishAnim: 'Goldx2_vanish',
+                score: 10,
+                weight: 20
+            },
+            {
+                key: 'coinGoldx3',
+                rotateAnim: 'Goldx3_rotate',
+                vanishAnim: 'Goldx3_vanish',
+                score: 30,
+                weight: 10
+            },
+            {
+                key: 'coinGoldx4',
+                rotateAnim: 'Goldx4_rotate',
+                vanishAnim: 'Goldx4_vanish',
+                score: 50,
+                weight: 5
+            },
+            {
+                key: 'coinGoldx5',
+                rotateAnim: 'Goldx5_rotate',
+                vanishAnim: 'Goldx5_vanish',
+                score: 100,
+                weight: 2
+            }
         ];
 
-        // Use a weighted random selection for more realistic rarity
         const randomCoinType = this.weightedRandom(coinTypes);
 
-        // Create coin sprite with selected type
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
 
-        // Apply Perlin noise to the velocity for smoother variation
-        const velocityX = noiseValueX * 100;  // Adjust multiplier to change speed range
-        const velocityY = noiseValueY * 200 + 300;  // Adjust multiplier to change speed range
+        const angle = Phaser.Math.Between(0, 360);
+        const speed = Phaser.Math.Between(200, 400);
+
+        const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
+        const velocityY = speed * Math.sin(Phaser.Math.DegToRad(angle));
 
         coin.setVelocity(velocityX, velocityY);
+
+
         coin.setCollideWorldBounds(true);
-        coin.setBounce(0.9);
+        coin.setBounce(0);
+
+        coin.body.onWorldBounds = true;
+        this.physics.world.on('worldbounds', (body) => {
+            if (body.gameObject === coin) {
+                coin.destroy();
+            }
+        });
+
         coin.setInteractive();
         coin.coinType = randomCoinType;
 
@@ -106,7 +178,6 @@ export class StartGame extends Scene {
         this.coins.push(coin);
     }
 
-    // Function to select a coin type based on weighted probability
     weightedRandom(coinTypes) {
         const totalWeight = coinTypes.reduce((acc, coin) => acc + coin.weight, 0);
         let random = Phaser.Math.Between(0, totalWeight);
@@ -118,20 +189,17 @@ export class StartGame extends Scene {
             random -= coinTypes[i].weight;
         }
 
-        return coinTypes[0]; // Default return, should never happen if weights are correct
+        return coinTypes[0];
     }
 
     clickCoin(coin) {
-        // Disable the coin from being clicked
+
         coin.disableInteractive();
 
-        // Stop the coin's movement
         coin.setVelocity(0, 0);
 
-        // Play the 'vanish' animation
         coin.play(coin.coinType.vanishAnim);
 
-        // Play sound effect based on coin type
         switch (coin.coinType.key) {
             case 'coinBonze':
                 this.sound.play('coin_Bonze');
@@ -149,44 +217,48 @@ export class StartGame extends Scene {
                 this.sound.play('coin_Gold');
         }
 
-        // Destroy the coin after the animation completes
         coin.once('animationcomplete-' + coin.coinType.vanishAnim, () => coin.destroy());
 
-        // Add score based on coin type
         this.score += coin.coinType.score;
 
-        // Update the score text
         this.scoreText.setText(this.score.toString());
 
-        // Drop a new coin
         this.dropCoin();
+
     }
 
     update() {
-        // Update the time remaining
-        this.timeText.setText(Math.ceil(this.timer.getRemainingSeconds()).toString());
+
+        const remainingTime = Math.ceil(this.timer.getRemainingSeconds());
+
+        const hours = Math.floor(remainingTime / 3600);
+        const minutes = Math.floor((remainingTime % 3600) / 60);
+        const seconds = remainingTime % 60;
+
+        const formattedTime = this.formatTime(hours, minutes, seconds);
+
+        this.timeText.setText(formattedTime);
+    }
+
+    formatTime(hours, minutes, seconds) {
+        const pad = (num) => (num < 10 ? '0' : '') + num;
+        return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
 
     gameOver() {
-        // Stop all coins and play vanish animation
-        this.coins.forEach((coin) => {
+        this.coins.forEach(coin => {
             if (coin.active) {
                 coin.setVelocity(0, 0);
                 coin.play(coin.coinType.vanishAnim);
             }
         });
 
-        // Remove click handler
         this.input.off('gameobjectdown');
-
-        // Save highscore to the registry
         const highscore = this.registry.get('highscore');
-
         if (this.score > highscore) {
             this.registry.set('highscore', this.score);
         }
 
-        // Transition to the GameOver scene after a delay
         this.time.delayedCall(2000, () => this.scene.start('GameOver'));
     }
 }

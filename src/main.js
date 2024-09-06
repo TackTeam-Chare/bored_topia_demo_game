@@ -1,16 +1,20 @@
+import { ClickerGame } from './scenes/StartGame';
 import { Game } from 'phaser';
-import { Boot } from './scenes/Boot';
-import { HomeGame } from './scenes/HomeGame';
-import { StartGame } from './scenes/StartGame';
-import { GameOver } from './scenes/GameOver';
+import { GameOver } from './scenes/EndGame';
+import { MainMenu } from './scenes/Home';
 import { Preloader } from './scenes/Preloader';
+import { HowToPlay } from './scenes/HowToPlay';
+
+const width = 1024; 
+const aspectRatio = 8358 / 4697;
+const height = Math.round(width * aspectRatio);
 
 const config = {
     type: Phaser.AUTO,
-    width: 1024,
-    height: 768,
+    width: width,
+    height: height,
     parent: 'game-container',
-    backgroundColor: '#028af8',
+    backgroundColor: '#000000',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
@@ -22,10 +26,10 @@ const config = {
         }
     },
     scene: [
-        Boot,
         Preloader,
-        HomeGame,
-        StartGame,
+        MainMenu,
+        HowToPlay,
+        ClickerGame,
         GameOver
     ]
 };
