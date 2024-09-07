@@ -1,5 +1,9 @@
-import { Scene } from 'phaser';
-import { Noise } from 'noisejs';
+import {
+    Scene
+} from 'phaser';
+import {
+    Noise
+} from 'noisejs';
 
 export class ClickerGame extends Scene {
     constructor() {
@@ -16,6 +20,8 @@ export class ClickerGame extends Scene {
     }
 
     create() {
+        // Reset score when starting the game
+        this.registry.set('highscore', 0);
         this.score = 0;
         this.coins = [];
 
@@ -65,7 +71,6 @@ export class ClickerGame extends Scene {
             this.scene.start('ClickerGame');
         });
 
-        // 10-second timer
         this.timer = this.time.addEvent({
             delay: 10000,
             callback: () => this.gameOver()
@@ -83,7 +88,7 @@ export class ClickerGame extends Scene {
         const delay = Phaser.Math.Between(500, 3000);
         this.time.delayedCall(delay, () => {
 
-            const coinCount = Phaser.Math.Between(1, 10); 
+            const coinCount = Phaser.Math.Between(1, 10);
             for (let i = 0; i < coinCount; i++) {
                 this.dropCoin();
             }
@@ -101,8 +106,7 @@ export class ClickerGame extends Scene {
         const x = dispenserX + Phaser.Math.Between(-30, 30);
         const y = dispenserY + Phaser.Math.Between(-10, 10);
 
-        const coinTypes = [
-            {
+        const coinTypes = [{
                 key: 'coinBonze',
                 rotateAnim: 'Bonze_rotate',
                 vanishAnim: 'Bonze_vanish',
@@ -145,21 +149,21 @@ export class ClickerGame extends Scene {
                 weight: 2
             }
         ];
-    
+
         const randomCoinType = this.weightedRandom(coinTypes);
 
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
 
         coin.setScale(1.5);
-    
+
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
-    
+
         const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
         const velocityY = speed * Math.sin(Phaser.Math.DegToRad(angle));
-    
+
         coin.setVelocity(velocityX, velocityY);
-    
+
         coin.setCollideWorldBounds(true);
         coin.setBounce(0);
 
@@ -169,13 +173,12 @@ export class ClickerGame extends Scene {
                 coin.destroy();
             }
         });
-    
+
         coin.setInteractive();
         coin.coinType = randomCoinType;
-    
+
         this.coins.push(coin);
     }
-    
 
     weightedRandom(coinTypes) {
         const totalWeight = coinTypes.reduce((acc, coin) => acc + coin.weight, 0);
@@ -187,7 +190,7 @@ export class ClickerGame extends Scene {
             }
             random -= coinTypes[i].weight;
         }
-
+        
         return coinTypes[0];
     }
 
@@ -195,9 +198,9 @@ export class ClickerGame extends Scene {
 
         coin.disableInteractive();
         coin.setVelocity(0, 0);
-    
+
         coin.play(coin.coinType.vanishAnim);
-   
+
         switch (coin.coinType.key) {
             case 'coinBonze':
                 this.sound.play('coin_Bonze');
@@ -225,9 +228,12 @@ export class ClickerGame extends Scene {
 
         this.tweens.add({
             targets: scoreText,
-            y: coin.y - 50,   
-            alpha: 0,        
-            scale: { from: 1, to: 1.5 },
+            y: coin.y - 50,
+            alpha: 0,
+            scale: {
+                from: 1,
+                to: 1.5
+            },
             duration: 1000,
             ease: 'Cubic.easeOut',
             onComplete: () => {
@@ -242,7 +248,7 @@ export class ClickerGame extends Scene {
 
         this.dropCoin();
     }
-    
+
 
     update() {
 
