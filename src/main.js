@@ -7,12 +7,11 @@ import { HowToPlay } from './scenes/HowToPlay';
 
 const width = 1024; 
 const aspectRatio = 8358 / 4697;
-const height = Math.round(width * aspectRatio);
 
 const config = {
     type: Phaser.AUTO,
-    width: width,
-    height: height,
+    width: 1024, 
+    height: Math.round(1024 * (8358 / 4697)),
     parent: 'game-container',
     backgroundColor: '#000000',
     scale: {
@@ -34,4 +33,5 @@ const config = {
     ]
 };
 
-export default new Game(config);
+export default new Phaser.Game(config);
+

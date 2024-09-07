@@ -17,7 +17,7 @@ export class MainMenu extends Scene {
 
     create() {
         const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
-        bg.setDisplaySize(this.scale.width, this.scale.height);
+        bg.setDisplaySize(this.scale.width, this.scale.height); // Full screen background
 
         const logo = this.add.image(this.scale.width / 2, 400, 'logo').setScale(0.25);
         this.tweens.add({
@@ -29,13 +29,9 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        let isMobile = this.scale.isMobile;
+        let startButtonScale = Math.min(this.scale.width / 1200, this.scale.height / 900) * 1.0;
 
-        const startButtonScale = isMobile
-            ? Math.min(this.scale.width / 800, this.scale.height / 600) * 1.5
-            : Math.min(this.scale.width / 800, this.scale.height / 600) * 1.0;
-
-        const marginBottom = 50;
+        const marginBottom = this.scale.height * 0.1;
 
         const startButton = this.add.image(this.scale.width / 2, this.scale.height - marginBottom, 'Start1')
             .setInteractive()
