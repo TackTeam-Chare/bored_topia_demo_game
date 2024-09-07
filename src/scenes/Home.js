@@ -17,7 +17,7 @@ export class MainMenu extends Scene {
 
     create() {
         const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
-        bg.setDisplaySize(this.scale.width, this.scale.height); // ปรับ background ให้เต็มหน้าจอ
+        bg.setDisplaySize(this.scale.width, this.scale.height); // Full screen background
 
         const logo = this.add.image(this.scale.width / 2, 400, 'logo').setScale(0.25);
         this.tweens.add({
@@ -29,15 +29,15 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        // ปรับขนาดปุ่ม Start ให้เล็กลงและ responsive
-        const startButtonScale = Math.min(this.scale.width / 800, this.scale.height / 600) * 1.5; // ปรับสัดส่วนลดลง
+        // Adjust the scaling factor for the Start button for different screen sizes.
+        let startButtonScale = Math.min(this.scale.width / 1200, this.scale.height / 900) * 1.0; // Reduced scale factor
 
-        // เพิ่ม margin-bottom ให้กับปุ่ม Start
-        const marginBottom = 50;
+        // Add margin-bottom to the button position
+        const marginBottom = this.scale.height * 0.1; // 10% margin from the bottom of the screen
 
         const startButton = this.add.image(this.scale.width / 2, this.scale.height - marginBottom, 'Start1')
             .setInteractive()
-            .setScale(startButtonScale); // ปรับขนาดของปุ่ม
+            .setScale(startButtonScale); // Responsive scaling
 
         startButton.setPosition(this.scale.width / 2, this.scale.height - startButton.displayHeight / 2 - marginBottom);
 
