@@ -6,13 +6,12 @@ export class MainMenu extends Scene {
     }
 
     preload() {
-        this.load.setPath('assets/ui/background/');
-        this.load.image('logo', 'logo.png');
-        this.load.image('Start1', 'Start1.svg');
-        this.load.image('Start2', 'Start2.svg');
-        this.load.image('Start3', 'Start3.svg');
-        this.load.image('Start4', 'Start4.svg');
-        this.load.image('OpeningPage', 'OpeningPage.png');
+        this.load.image('logo', 'assets/ui/logo.png');
+        this.load.image('Start1', 'assets/ui/background/Start1.svg');
+        this.load.image('Start2', 'assets/ui/background/Start2.svg');
+        this.load.image('Start3', 'assets/ui/background/Start3.svg');
+        this.load.image('Start4', 'assets/ui/background/Start4.svg');
+        this.load.image('OpeningPage', 'assets/ui/background/OpeningPage.png');
     }
 
     create() {

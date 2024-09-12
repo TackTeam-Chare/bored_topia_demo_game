@@ -8,31 +8,14 @@ export class Preloader extends Scene
     }
 
     preload ()
-    {   
-        // Home
-        this.load.setPath('assets/ui/background/');
-        this.load.image('OpeningPage', 'OpeningPage.png');
-
-        //  Load the background
-        this.load.setPath('assets');
-        // Load common assets
-        this.load.image('background', '/ui/background.png');
-        this.load.image('logo', '/ui/logo.png');
-
-
-        // Background
-        this.load.setPath('assets/ui/background/');
-        this.load.image('PlayPage', 'PlayPage.png');
-        this.load.image('BG', 'BG.png');
-        this.load.image('OpeningPage', 'OpeningPage.png');
-        this.load.image('CoinDispenser', 'CoinDispenser.png');
-        this.load.image('Score', 'Score.svg');
-        this.load.image('Clock', 'Clock.svg');
-        this.load.image('Play', 'Play.png');
-
-        // // Buttons
-        // this.load.setPath('assets/ui/buttons/');
-        // this.load.image('Play', 'Play.png');
+    {
+        this.load.image('PlayPage', 'assets/ui/background/PlayPage.png');
+        this.load.image('BG', 'assets/ui/background/BG.png');
+        this.load.image('OpeningPage', 'assets/ui/background/OpeningPage.png');
+        this.load.image('CoinDispenser', 'assets/ui/background/CoinDispenser.png');
+        this.load.image('Score', 'assets/ui/background/Score.svg');
+        this.load.image('Clock', 'assets/ui/background/Clock.svg');
+        this.load.image('Play', 'assets/ui/background/Play.png');
 
         // coin
         this.load.setPath('assets/ui/coins');

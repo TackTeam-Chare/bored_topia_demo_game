@@ -9,9 +9,8 @@ export class HowToPlay extends Scene {
     }
 
     preload() {
-        this.load.setPath('assets/ui/background/');
-        this.load.image('howToPlayBackground', 'HowToPlayPage.png');
-        this.load.image('howToPlaySign', 'HowToPlaySign.png');
+        this.load.image('howToPlayBackground', 'assets/ui/background/HowToPlayPage.png');
+        this.load.image('howToPlaySign', 'assets/ui/background/HowToPlaySign.png');
     }
 
     create() {
