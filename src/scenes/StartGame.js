@@ -1,15 +1,12 @@
-import {
-    Scene
-} from 'phaser';
-import {
-    Noise
-} from 'noisejs';
+import { Scene } from 'phaser';
+import { Noise } from 'noisejs';
 
 export class ClickerGame extends Scene {
     constructor() {
         super('ClickerGame');
         this.noise = new Noise(Math.random());
         this.noiseOffset = 0;
+        this.isGameOver = false; // สถานะเพื่อตรวจสอบว่าเกมจบหรือยัง
     }
 
     preload() {
@@ -24,9 +21,9 @@ export class ClickerGame extends Scene {
         this.registry.set('highscore', 0);
         this.score = 0;
         this.coins = [];
+        this.isGameOver = false; // เริ่มต้นเป็น false
 
         const bg = this.add.image(0, 0, 'PlayPage').setOrigin(0, 0);
-
         bg.setDisplaySize(this.scale.width, this.scale.height);
 
         const coinDispenser = this.add.image(512, 330, 'CoinDispenser').setScale(0.15);
@@ -72,14 +69,14 @@ export class ClickerGame extends Scene {
         });
 
         this.timer = this.time.addEvent({
-            delay: 10000,
-            callback: () => this.gameOver()
+            delay: 30000,
+            callback: () => this.gameOver() // เรียกฟังก์ชัน gameOver เมื่อเวลาหมด
         });
 
-        this.physics.world.setBounds(0, -400, 1024, 768 + 310);
+        // Set the world bounds to the entire visible screen
+        this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
 
         this.scheduleNextCoinDrop();
-
 
         this.input.on('gameobjectdown', (pointer, gameObject) => this.clickCoin(gameObject));
     }
@@ -87,16 +84,18 @@ export class ClickerGame extends Scene {
     scheduleNextCoinDrop() {
         const delay = Phaser.Math.Between(500, 3000);
         this.time.delayedCall(delay, () => {
-
-            const coinCount = Phaser.Math.Between(1, 10);
-            for (let i = 0; i < coinCount; i++) {
-                this.dropCoin();
+            if (!this.isGameOver) { // ตรวจสอบว่าเกมยังไม่จบก่อนจะปล่อยเหรียญต่อ
+                const coinCount = Phaser.Math.Between(1, 10);
+                for (let i = 0; i < coinCount; i++) {
+                    this.dropCoin();
+                }
+                this.scheduleNextCoinDrop();
             }
-            this.scheduleNextCoinDrop();
         });
     }
 
     dropCoin() {
+        if (this.isGameOver) return; // ไม่ปล่อยเหรียญถ้าเกมจบแล้ว
 
         this.noiseOffset += 0.1;
 
@@ -160,16 +159,18 @@ export class ClickerGame extends Scene {
         const speed = Phaser.Math.Between(200, 400);
 
         const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
-        const velocityY = speed * Math.sin(Phaser.Math.DegToRad(angle));
+        const velocityY = Phaser.Math.Between(300, 400); // เพิ่มความเร็วแนวตั้งให้ตกถึงพื้น
 
         coin.setVelocity(velocityX, velocityY);
 
+        // ตั้งค่าให้เหรียญชนขอบหน้าจอและไม่เด้ง
         coin.setCollideWorldBounds(true);
         coin.setBounce(0);
 
         coin.body.onWorldBounds = true;
         this.physics.world.on('worldbounds', (body) => {
-            if (body.gameObject === coin) {
+            if (body.gameObject === coin && body.blocked.down) {
+                // ทำลายเหรียญเมื่อถึงพื้น
                 coin.destroy();
             }
         });
@@ -190,11 +191,12 @@ export class ClickerGame extends Scene {
             }
             random -= coinTypes[i].weight;
         }
-        
+
         return coinTypes[0];
     }
 
     clickCoin(coin) {
+        if (this.isGameOver) return; // ถ้าเกมจบแล้วไม่ให้คลิกเหรียญได้
 
         coin.disableInteractive();
         coin.setVelocity(0, 0);
@@ -249,9 +251,7 @@ export class ClickerGame extends Scene {
         this.dropCoin();
     }
 
-
     update() {
-
         const remainingTime = Math.ceil(this.timer.getRemainingSeconds());
 
         const hours = Math.floor(remainingTime / 3600);
@@ -269,6 +269,7 @@ export class ClickerGame extends Scene {
     }
 
     gameOver() {
+        this.isGameOver = true; // เปลี่ยนสถานะเป็นเกมจบ
         this.coins.forEach(coin => {
             if (coin.active) {
                 coin.setVelocity(0, 0);
@@ -276,12 +277,13 @@ export class ClickerGame extends Scene {
             }
         });
 
-        this.input.off('gameobjectdown');
+        this.input.off('gameobjectdown'); // ปิดการโต้ตอบ
         const highscore = this.registry.get('highscore');
         if (this.score > highscore) {
             this.registry.set('highscore', this.score);
         }
 
+        // ไปที่หน้า GameOver ทันทีเมื่อเกมจบ
         this.time.delayedCall(2000, () => this.scene.start('GameOver'));
     }
 }

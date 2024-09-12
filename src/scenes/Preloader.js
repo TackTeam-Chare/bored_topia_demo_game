@@ -8,15 +8,17 @@ export class Preloader extends Scene
     }
 
     preload ()
-    {
+    {   
+        // Home
+        this.load.setPath('assets/ui/background/');
+        this.load.image('OpeningPage', 'OpeningPage.png');
+
         //  Load the background
         this.load.setPath('assets');
         // Load common assets
         this.load.image('background', '/ui/background.png');
-        this.load.image('background_game_over', '/ui/background_game_over.png');
         this.load.image('logo', '/ui/logo.png');
-        this.load.image('Bar_coin', '/ui/Bar_coin.png');
-        this.load.image('Bar_time', '/ui/Bar_time.png');
+
 
         // Background
         this.load.setPath('assets/ui/background/');

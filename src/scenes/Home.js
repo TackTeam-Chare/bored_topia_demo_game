@@ -29,7 +29,7 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        let startButtonScale = Math.min(this.scale.width / 1200, this.scale.height / 900) * 1.0;
+        let startButtonScale = Math.min(this.scale.width / 800, this.scale.height / 600) * 1.5;
 
         const marginBottom = this.scale.height * 0.1;
 
@@ -48,6 +48,7 @@ export class MainMenu extends Scene {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+
 
         startButton.on('pointerover', () => {
             pulsingTween.pause();
