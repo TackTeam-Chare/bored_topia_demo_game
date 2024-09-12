@@ -96,15 +96,15 @@ export class ClickerGame extends Scene {
 
     dropCoin() {
         if (this.isGameOver) return; // ไม่ปล่อยเหรียญถ้าเกมจบแล้ว
-
+   
         this.noiseOffset += 0.1;
-
+   
         const dispenserX = 512;
         const dispenserY = 330;
-
+   
         const x = dispenserX + Phaser.Math.Between(-30, 30);
         const y = dispenserY + Phaser.Math.Between(-10, 10);
-
+   
         const coinTypes = [{
                 key: 'coinBonze',
                 rotateAnim: 'Bonze_rotate',
@@ -148,25 +148,25 @@ export class ClickerGame extends Scene {
                 weight: 2
             }
         ];
-
+   
         const randomCoinType = this.weightedRandom(coinTypes);
-
+   
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
-
+   
         coin.setScale(1.5);
-
+   
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
-
+   
         const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
         const velocityY = Phaser.Math.Between(300, 400); // เพิ่มความเร็วแนวตั้งให้ตกถึงพื้น
-
+   
         coin.setVelocity(velocityX, velocityY);
-
+   
         // ตั้งค่าให้เหรียญชนขอบหน้าจอและไม่เด้ง
         coin.setCollideWorldBounds(true);
         coin.setBounce(0);
-
+   
         coin.body.onWorldBounds = true;
         this.physics.world.on('worldbounds', (body) => {
             if (body.gameObject === coin && body.blocked.down) {
@@ -174,12 +174,16 @@ export class ClickerGame extends Scene {
                 coin.destroy();
             }
         });
+   
 
-        coin.setInteractive();
+        this.time.delayedCall(100, () => {
+            coin.setInteractive();
+        });
+   
         coin.coinType = randomCoinType;
-
         this.coins.push(coin);
     }
+   
 
     weightedRandom(coinTypes) {
         const totalWeight = coinTypes.reduce((acc, coin) => acc + coin.weight, 0);
