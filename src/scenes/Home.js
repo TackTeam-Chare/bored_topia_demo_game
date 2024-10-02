@@ -18,7 +18,7 @@ export class MainMenu extends Scene {
         const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
         bg.setDisplaySize(this.scale.width, this.scale.height);
 
-        const logo = this.add.image(this.scale.width / 2, 400, 'logo').setScale(0.25);
+        const logo = this.add.image(this.scale.width / 2, 350, 'logo').setScale(0.25);
         this.tweens.add({
             targets: logo,
             y: 290,
