@@ -34,10 +34,12 @@ export class HallOfFame extends Phaser.Scene {
         // Create the rank image holder, but keep it invisible
         let currentRankImage = this.add.image(475, 685, rankImages[0]).setOrigin(0.5).setScale(0.45).setVisible(false);
 
-        // Scroll bar and buttons
-        const scrollUpButton = this.add.image(780, 300, 'scrollArrow').setScale(0.4).setInteractive();
-        const scrollDownButton = this.add.image(780, 600, 'scrollArrow').setScale(0.4).setInteractive().setFlipY(true);
-        const scrollBar = this.add.image(780, 600, 'scrollBar').setScale(5);
+        // Scroll bar
+        const scrollBar = this.add.image(780, 620, 'scrollBar').setScale(5, 5);  // Positioned centrally for better alignment
+
+        // Scroll arrows (up and down) positioned on top and bottom of the scrollBar
+        const scrollUpButton = this.add.image(scrollBar.x, scrollBar.y - scrollBar.displayHeight / 2, 'scrollArrow').setScale(0.4).setInteractive();
+        const scrollDownButton = this.add.image(scrollBar.x, scrollBar.y + scrollBar.displayHeight / 2, 'scrollArrow').setScale(0.4).setInteractive().setFlipY(true);
 
         // Scroll up button functionality
         scrollUpButton.on('pointerdown', () => {
