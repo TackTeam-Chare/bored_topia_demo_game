@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "noisejs": "^2.1.0",
-    "phaser": "^3.80.1"
+    "phaser": "^3.80.1",
+    "web3": "^4.13.0"
   }
 }
