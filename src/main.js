@@ -1,6 +1,7 @@
 import { ClickerGame } from './scenes/StartGame';
 import { Game } from 'phaser';
 import { GameOver } from './scenes/EndGame';
+import { Leaderboard } from './scenes/Leaderboard';
 import { MainMenu } from './scenes/Home';
 import { Preloader } from './scenes/Preloader';
 import { HowToPlay } from './scenes/HowToPlay';
@@ -29,7 +30,8 @@ const config = {
         MainMenu,
         HowToPlay,
         ClickerGame,
-        GameOver
+        GameOver,
+        Leaderboard
     ]
 };
 

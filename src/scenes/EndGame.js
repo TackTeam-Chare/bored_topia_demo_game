@@ -115,7 +115,7 @@ export class GameOver extends Phaser.Scene {
         // Return to the main menu when clicking anywhere
         this.input.once('pointerdown', () => {
             this.registry.set('highscore', 0);
-            this.scene.start('MainMenu');
+            this.scene.start('Leaderboard');
         });
     }
 
