@@ -60,20 +60,39 @@ export class HowToPlay extends Scene {
         playButton.on('pointerdown', () => {
             this.scene.start('ClickerGame');  // Start the clicker game scene
         });
-
+        // เพิ่ม hover effect สำหรับปุ่ม Play
+        this.addHoverEffect(playButton);
+    
         // Skip button
         const skipButton = this.add.image(650, 620, 'buttonSkip').setInteractive().setScale(0.6);
         skipButton.on('pointerdown', () => {
             this.scene.start('ClickerGame');  // Skip and start the clicker game scene
         });
-
+        // เพิ่ม hover effect สำหรับปุ่ม Skip
+        this.addHoverEffect(skipButton);
+    
         // Connect Wallet button (centered)
         const centerX = this.cameras.main.width / 2;
         const connectWalletButton = this.add.image(centerX, 780, 'connectWallet').setInteractive().setScale(0.15);
         connectWalletButton.on('pointerdown', () => {
             console.log('Wallet connected!');  // Placeholder for connecting wallet functionality
         });
+        // เพิ่ม hover effect สำหรับปุ่ม Connect Wallet
+        this.addHoverEffect(connectWalletButton);
     }
+    
+    addHoverEffect(button) {
+        // เมื่อเมาส์เลื่อนเข้าเปลี่ยนสเกลเพิ่มขึ้นเล็กน้อย
+        button.on('pointerover', () => {
+            button.setScale(button.scaleX * 1.1);
+        });
+    
+        // เมื่อเมาส์เลื่อนออก กลับคืนสู่ขนาดปกติ
+        button.on('pointerout', () => {
+            button.setScale(button.scaleX / 1.1);
+        });
+    }
+    
 
     typeText(instructionsText) {
         // เพิ่มทีละตัวอักษร พร้อม animation

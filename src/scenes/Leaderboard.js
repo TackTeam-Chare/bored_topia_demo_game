@@ -70,7 +70,7 @@ export class Leaderboard extends Phaser.Scene {
         // Return to the main menu when clicking anywhere
         this.input.once('pointerdown', () => {
             this.registry.set('highscore', 0);
-            this.scene.start('Achievement');
+            this.scene.start('HallOfFame');
         });
     }
 
