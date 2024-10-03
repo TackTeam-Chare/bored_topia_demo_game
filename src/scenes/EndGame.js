@@ -52,7 +52,7 @@ export class GameOver extends Phaser.Scene {
 
         // Display score text
         const scoreBoxTextStyle = { fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
-        const scoreText = this.add.text(550, 1045, `${score}`, scoreBoxTextStyle).setAlign('center').setOrigin(0.5);
+        const scoreText = this.add.text(630, 1045, `${score}`, scoreBoxTextStyle).setAlign('center').setOrigin(0.5);
         this.tweens.add({
             targets: scoreText,
             scale: { from: 0.9, to: 1.1 },
