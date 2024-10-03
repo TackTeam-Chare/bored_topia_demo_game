@@ -1,4 +1,4 @@
-import { Scene } from 'phaser';
+import { Scene } from 'phaser'; 
 import { Noise } from 'noisejs';
 
 export class ClickerGame extends Scene {
@@ -14,20 +14,28 @@ export class ClickerGame extends Scene {
         this.load.audio('coin_Gold_X', 'assets/sounds/coin_Gold_X.mp3');
         this.load.audio('coin_Gold', 'assets/sounds/coin_Gold.mp3');
         this.load.audio('coin_Silver', 'assets/sounds/coin_Silver.mp3');
+        this.load.image('wallet', 'assets/ui/background/wallet.svg');
+
+        this.load.image('button_exit', 'assets/ui/background/button_exit.svg');
+        this.load.image('button_leaderboard', 'assets/ui/background/button_leaderboard.svg');
+        this.load.image('button_setting', 'assets/ui/background/button_setting.svg');
+        this.load.image('button_sound_on', 'assets/ui/background/button_sound_on.svg');
+        this.load.image('button_sound_off', 'assets/ui/background/button_sound_off.svg');
+        this.load.image('play_button', 'assets/ui/background/Play.png');
     }
 
-    create() {
+    create() { 
         // Reset score when starting the game
         this.registry.set('highscore', 0);
         this.score = 0;
         this.coins = [];
         this.isGameOver = false; // เริ่มต้นเป็น false
-
+    
         const bg = this.add.image(0, 0, 'PlayPage').setOrigin(0, 0);
         bg.setDisplaySize(this.scale.width, this.scale.height);
-
+    
         const coinDispenser = this.add.image(512, 330, 'CoinDispenser').setScale(0.15);
-
+    
         this.tweens.add({
             targets: coinDispenser,
             y: 170,
@@ -36,11 +44,13 @@ export class ClickerGame extends Scene {
             yoyo: true,
             repeat: -1
         });
-
+    
+        // Position the wallet, score, and time icons
         const topMargin = 30;
-        const timeBg = this.add.image(120, 60 + topMargin, 'Clock').setDisplaySize(220, 75).setAlpha(1);
-        const scoreBg = this.add.image(900, 60 + topMargin, 'Score').setDisplaySize(200, 75).setAlpha(1);
-
+        const timeBg = this.add.image(140, 200 + topMargin, 'Clock').setDisplaySize(240, 75).setAlpha(1);
+        const scoreBg = this.add.image(850, 200 + topMargin, 'Score').setDisplaySize(230, 75).setAlpha(1);
+        const walletIcon = this.add.image(850, 80 + topMargin, 'wallet').setDisplaySize(230, 100).setAlpha(1);
+    
         const textStyle = {
             fontFamily: 'Arial Black',
             fontSize: '30px',
@@ -48,43 +58,82 @@ export class ClickerGame extends Scene {
             stroke: '#000000',
             strokeThickness: 6
         };
-
+    
         this.scoreText = this.add.text(scoreBg.x, scoreBg.y, '0', textStyle).setOrigin(0.5).setDepth(1);
         this.timeText = this.add.text(timeBg.x, timeBg.y, '10', textStyle).setOrigin(0.3).setDepth(1);
-
-        const playButton = this.add.image(512, 1450, 'Play')
-            .setInteractive()
-            .setScale(0.2);
-
-        playButton.on('pointerover', () => {
-            playButton.setScale(0.2);
+    
+        // Play button and rearranged buttons
+        const playButton = this.add.image(512, 1600, 'play_button').setInteractive().setScale(0.22);
+    
+        const buttonScale = 0.6;
+        const buttonY = playButton.y + 45;
+        const buttonSpacing = 105;
+    
+        // Rearrange the buttons
+        const leaderboardButton = this.add.image(playButton.x - 1.5 * buttonSpacing, buttonY, 'button_leaderboard').setScale(buttonScale).setInteractive();
+        const soundButton = this.add.image(playButton.x - 0.5 * buttonSpacing, buttonY, 'button_sound_on').setScale(buttonScale).setInteractive();
+        const settingButton = this.add.image(playButton.x + 0.5 * buttonSpacing, buttonY, 'button_setting').setScale(buttonScale).setInteractive();
+        const exitButton = this.add.image(playButton.x + 1.5 * buttonSpacing, buttonY, 'button_exit').setScale(buttonScale).setInteractive();
+    
+        // Add hover effect
+        this.addHoverEffect(soundButton);
+        this.addHoverEffect(settingButton);
+        this.addHoverEffect(exitButton);
+        this.addHoverEffect(leaderboardButton);
+    
+        // Sound Button Toggle
+        let soundOn = true;
+        soundButton.on('pointerdown', () => {
+            soundOn = !soundOn;
+            if (soundOn) {
+                soundButton.setTexture('button_sound_on');
+            } else {
+                soundButton.setTexture('button_sound_off');
+            }
         });
-
-        playButton.on('pointerout', () => {
-            playButton.setScale(0.175);
+    
+        // Leaderboard Button Action
+        leaderboardButton.on('pointerdown', () => {
+            console.log('Open Leaderboard');
+            // Add your leaderboard functionality here
         });
-
-        playButton.on('pointerdown', () => {
-            this.scene.start('ClickerGame');
+    
+        // Settings Button Action
+        settingButton.on('pointerdown', () => {
+            console.log('Open Settings');
+            // Open settings screen or modal
         });
-
-        this.timer = this.time.addEvent({
-            delay: 30000,
-            callback: () => this.gameOver() // เรียกฟังก์ชัน gameOver เมื่อเวลาหมด
+    
+        // Exit Button Action
+        exitButton.on('pointerdown', () => {
+            console.log('Exit Game');
+            this.scene.start('MainMenu');
         });
-
+    
         // Set the world bounds to the entire visible screen
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
-
+    
+        // Timer initialization (ensure it's set correctly)
+        this.timer = this.time.addEvent({
+            delay: 500,
+            callback: () => this.gameOver() // End the game after 30 seconds
+        });
+    
         this.scheduleNextCoinDrop();
-
+    
         this.input.on('gameobjectdown', (pointer, gameObject) => this.clickCoin(gameObject));
+    }
+    
+
+    addHoverEffect(button) {
+        button.on('pointerover', () => button.setScale(button.scaleX * 1.2));
+        button.on('pointerout', () => button.setScale(button.scaleX / 1.2));
     }
 
     scheduleNextCoinDrop() {
         const delay = Phaser.Math.Between(500, 3000);
         this.time.delayedCall(delay, () => {
-            if (!this.isGameOver) { // ตรวจสอบว่าเกมยังไม่จบก่อนจะปล่อยเหรียญต่อ
+            if (!this.isGameOver) { 
                 const coinCount = Phaser.Math.Between(1, 10);
                 for (let i = 0; i < coinCount; i++) {
                     this.dropCoin();
@@ -95,95 +144,54 @@ export class ClickerGame extends Scene {
     }
 
     dropCoin() {
-        if (this.isGameOver) return; // ไม่ปล่อยเหรียญถ้าเกมจบแล้ว
-   
+        if (this.isGameOver) return; 
+
         this.noiseOffset += 0.1;
-   
+
         const dispenserX = 512;
         const dispenserY = 330;
-   
+
         const x = dispenserX + Phaser.Math.Between(-30, 30);
         const y = dispenserY + Phaser.Math.Between(-10, 10);
-   
-        const coinTypes = [{
-                key: 'coinBonze',
-                rotateAnim: 'Bonze_rotate',
-                vanishAnim: 'Bonze_vanish',
-                score: 1,
-                weight: 50
-            },
-            {
-                key: 'coinSilver',
-                rotateAnim: 'Silver_rotate',
-                vanishAnim: 'Silver_vanish',
-                score: 2,
-                weight: 30
-            },
-            {
-                key: 'coinGoldx2',
-                rotateAnim: 'Goldx2_rotate',
-                vanishAnim: 'Goldx2_vanish',
-                score: 10,
-                weight: 20
-            },
-            {
-                key: 'coinGoldx3',
-                rotateAnim: 'Goldx3_rotate',
-                vanishAnim: 'Goldx3_vanish',
-                score: 30,
-                weight: 10
-            },
-            {
-                key: 'coinGoldx4',
-                rotateAnim: 'Goldx4_rotate',
-                vanishAnim: 'Goldx4_vanish',
-                score: 50,
-                weight: 5
-            },
-            {
-                key: 'coinGoldx5',
-                rotateAnim: 'Goldx5_rotate',
-                vanishAnim: 'Goldx5_vanish',
-                score: 100,
-                weight: 2
-            }
+
+        const coinTypes = [
+            { key: 'coinBonze', rotateAnim: 'Bonze_rotate', vanishAnim: 'Bonze_vanish', score: 1, weight: 50 },
+            { key: 'coinSilver', rotateAnim: 'Silver_rotate', vanishAnim: 'Silver_vanish', score: 2, weight: 30 },
+            { key: 'coinGoldx2', rotateAnim: 'Goldx2_rotate', vanishAnim: 'Goldx2_vanish', score: 10, weight: 20 },
+            { key: 'coinGoldx3', rotateAnim: 'Goldx3_rotate', vanishAnim: 'Goldx3_vanish', score: 30, weight: 10 },
+            { key: 'coinGoldx4', rotateAnim: 'Goldx4_rotate', vanishAnim: 'Goldx4_vanish', score: 50, weight: 5 },
+            { key: 'coinGoldx5', rotateAnim: 'Goldx5_rotate', vanishAnim: 'Goldx5_vanish', score: 100, weight: 2 }
         ];
-   
+
         const randomCoinType = this.weightedRandom(coinTypes);
-   
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
-   
+
         coin.setScale(1.5);
-   
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
-   
+
         const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
-        const velocityY = Phaser.Math.Between(300, 400); // เพิ่มความเร็วแนวตั้งให้ตกถึงพื้น
-   
+        const velocityY = Phaser.Math.Between(300, 400);
+
         coin.setVelocity(velocityX, velocityY);
-   
-        // ตั้งค่าให้เหรียญชนขอบหน้าจอและไม่เด้ง
+
         coin.setCollideWorldBounds(true);
         coin.setBounce(0);
-   
+
         coin.body.onWorldBounds = true;
         this.physics.world.on('worldbounds', (body) => {
             if (body.gameObject === coin && body.blocked.down) {
-                // ทำลายเหรียญเมื่อถึงพื้น
                 coin.destroy();
             }
         });
-   
 
         this.time.delayedCall(100, () => {
             coin.setInteractive();
         });
-   
+
         coin.coinType = randomCoinType;
         this.coins.push(coin);
     }
-   
 
     weightedRandom(coinTypes) {
         const totalWeight = coinTypes.reduce((acc, coin) => acc + coin.weight, 0);
@@ -200,11 +208,10 @@ export class ClickerGame extends Scene {
     }
 
     clickCoin(coin) {
-        if (this.isGameOver) return; // ถ้าเกมจบแล้วไม่ให้คลิกเหรียญได้
+        if (this.isGameOver) return;
 
         coin.disableInteractive();
         coin.setVelocity(0, 0);
-
         coin.play(coin.coinType.vanishAnim);
 
         switch (coin.coinType.key) {
@@ -236,15 +243,10 @@ export class ClickerGame extends Scene {
             targets: scoreText,
             y: coin.y - 50,
             alpha: 0,
-            scale: {
-                from: 1,
-                to: 1.5
-            },
+            scale: { from: 1, to: 1.5 },
             duration: 1000,
             ease: 'Cubic.easeOut',
-            onComplete: () => {
-                scoreText.destroy();
-            }
+            onComplete: () => scoreText.destroy()
         });
 
         coin.once('animationcomplete-' + coin.coinType.vanishAnim, () => coin.destroy());
@@ -256,15 +258,16 @@ export class ClickerGame extends Scene {
     }
 
     update() {
-        const remainingTime = Math.ceil(this.timer.getRemainingSeconds());
+        if (this.timer) {
+            const remainingTime = Math.ceil(this.timer.getRemainingSeconds());
 
-        const hours = Math.floor(remainingTime / 3600);
-        const minutes = Math.floor((remainingTime % 3600) / 60);
-        const seconds = remainingTime % 60;
+            const hours = Math.floor(remainingTime / 3600);
+            const minutes = Math.floor((remainingTime % 3600) / 60);
+            const seconds = remainingTime % 60;
 
-        const formattedTime = this.formatTime(hours, minutes, seconds);
-
-        this.timeText.setText(formattedTime);
+            const formattedTime = this.formatTime(hours, minutes, seconds);
+            this.timeText.setText(formattedTime);
+        }
     }
 
     formatTime(hours, minutes, seconds) {
@@ -273,7 +276,7 @@ export class ClickerGame extends Scene {
     }
 
     gameOver() {
-        this.isGameOver = true; // เปลี่ยนสถานะเป็นเกมจบ
+        this.isGameOver = true;
         this.coins.forEach(coin => {
             if (coin.active) {
                 coin.setVelocity(0, 0);
@@ -281,13 +284,12 @@ export class ClickerGame extends Scene {
             }
         });
 
-        this.input.off('gameobjectdown'); // ปิดการโต้ตอบ
+        this.input.off('gameobjectdown');
         const highscore = this.registry.get('highscore');
         if (this.score > highscore) {
             this.registry.set('highscore', this.score);
         }
 
-        // ไปที่หน้า GameOver ทันทีเมื่อเกมจบ
         this.time.delayedCall(2000, () => this.scene.start('GameOver'));
     }
 }
