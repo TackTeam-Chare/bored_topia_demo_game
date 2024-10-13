@@ -1,40 +1,60 @@
 export class Leaderboard extends Phaser.Scene { 
+    constructor() {
+        super('Leaderboard');
+        this.leaderboardTexts = [];  // Array to store text objects
+    }
+
     fetchLeaderboard() {
         fetch('http://localhost:3000/leaderboard')
             .then(response => response.json())
             .then(data => {
-                // Coordinates for leaderboard slots
-                const leaderboardSlots = [
-                    { x: 200, y: 200 }, // Position for the first slot (1st place)
-                    { x: 200, y: 260 }, // Position for the second slot (2nd place)
-                    { x: 200, y: 320 }, // Position for the third slot (3rd place)
-                    { x: 200, y: 380 }, // Continue for other ranks
-                    { x: 200, y: 440 },
-                    { x: 200, y: 500 },
-                    { x: 200, y: 560 },
-                    { x: 200, y: 620 },
-                    { x: 200, y: 680 },
-                    { x: 200, y: 740 },
-                    { x: 200, y: 800 },
-                    { x: 200, y: 860 }
-                ];
-
-                data.forEach((player, index) => {
-                    if (index < 12) { // Only show top 12 players
-                        const { x, y } = leaderboardSlots[index];
-                        this.add.text(x, y, `${index + 1}. ${player.userAddress}: ${player.score}`, {
-                            fontSize: '32px',
-                            fill: '#fff',
-                            fontFamily: 'Arial Black'
-                        });
-                    }
-                });
+                // Update the leaderboard display with real-time data
+                this.updateLeaderboardDisplay(data);
             })
             .catch(error => console.error('Error fetching leaderboard:', error));
     }
 
-    constructor() {
-        super('Leaderboard');
+    updateLeaderboardDisplay(data) {
+        // Clear the existing text objects
+        this.leaderboardTexts.forEach(text => text.destroy());
+        this.leaderboardTexts = [];
+
+        // Coordinates for leaderboard slots matching the layout from the image
+        const leaderboardSlots = [
+
+            { x: 320, y: 290 },
+            { x: 320, y: 365 },
+            { x: 320, y: 450 },
+            { x: 320, y: 530 },
+            { x: 320, y: 610 },
+            { x: 320, y: 690 },
+            { x: 320, y: 770 },
+            { x: 320, y: 850 },
+            { x: 320, y: 930 },
+            { x: 320, y: 1015 },
+            { x: 320, y: 1100 },
+
+   
+        ];
+
+        // Add the updated text objects
+        data.forEach((player, index) => {
+            if (index < 12) { // Only show top 12 players
+                const { x, y } = leaderboardSlots[index];
+
+                // Trimming the user address to show the first 4 and last 4 characters
+                const trimmedAddress = `${player.userAddress.slice(0, 4)}${player.userAddress.slice(-4)}`;
+                
+                // Creating the text that includes the trimmed address and player score with increased spacing
+                const leaderboardText = this.add.text(x, y, `${trimmedAddress}     ${player.score}`, {
+                    fontSize: '32px',
+                    fill: '#fff',
+                    fontFamily: 'Arial Black'
+                });
+                
+                this.leaderboardTexts.push(leaderboardText);
+            }
+        });
     }
 
     preload() {
@@ -91,15 +111,23 @@ export class Leaderboard extends Phaser.Scene {
         this.addHoverEffect(shareOnXButton);
 
         const bonusText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
-        this.addTypingEffect(512, 1720, bonusText, { 
-            fontSize: '28px', 
-            fontFamily: 'Arial', 
+        this.addTypingEffect(512, 1720, bonusText, {
+            fontSize: '28px',
+            fontFamily: 'Arial',
             color: '#ffffff',
             lineSpacing: 5
         });
 
-        // Fetch and display leaderboard data
+        // Fetch and display leaderboard data initially
         this.fetchLeaderboard();
+
+        // Set an interval to refresh the leaderboard every 5 seconds
+        this.time.addEvent({
+            delay: 5000, // Refresh every 5 seconds
+            callback: this.fetchLeaderboard,
+            callbackScope: this,
+            loop: true
+        });
     }
 
     addHoverEffect(button) {

@@ -99,6 +99,7 @@ export class ClickerGame extends Scene {
 
         // Leaderboard Button Action
         leaderboardButton.on('pointerdown', () => {
+            this.scene.start('Leaderboard');  
             console.log('Open Leaderboard');
         });
 
