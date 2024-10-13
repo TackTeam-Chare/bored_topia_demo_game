@@ -116,4 +116,3 @@ export class HowToPlay extends Scene {
         }
     }
 }
-

@@ -9,13 +9,15 @@ export class HallOfFame extends Phaser.Scene {
         this.load.image('Hall_of_fame', 'assets/ui/background/Hall_of_fame.png');
         this.load.image('InviteFriends', 'assets/ui/background/Invite_friends.png');
         this.load.image('ShareOnX', 'assets/ui/background/Share_on_X.png');
+        this.load.image('ShareOnFB', 'assets/ui/background/Share_on_FB.png'); // Add Facebook Share icon
+        this.load.image('ShareLink', 'assets/ui/background/Share_link.png');  // Add Copy Link icon
         this.load.image('button_exit', 'assets/ui/background/button_exit.svg');
         this.load.image('button_play2', 'assets/ui/background/button_play2.svg');
-    
+
         // Load scroll bar and arrow
         this.load.image('scrollArrow', 'assets/ui/background/button_scroll_arrow.svg');
         this.load.image('scrollBar', 'assets/ui/background/button_scroll_bar.svg');
-    
+
         // Load rank images (1-12, 13-24, 25-36, 37-48)
         this.load.image('rank13-24', 'assets/ui/background/13-24.png');
         this.load.image('rank25-36', 'assets/ui/background/25-36.png');
@@ -78,11 +80,16 @@ export class HallOfFame extends Phaser.Scene {
         const playButton = this.add.image(400, 1240, 'button_play2').setScale(0.8).setInteractive();
         const exitButton = this.add.image(600, 1240, 'button_exit').setScale(0.8).setInteractive();
 
+        // Add share buttons (Share on X, Share on Facebook, Copy Link)
         const shareOnXButton = this.add.image(512, 1450, 'ShareOnX').setScale(0.17).setInteractive();
+        const shareOnFBButton = this.add.image(362, 1450, 'ShareOnFB').setScale(0.17).setInteractive();
+        const shareLinkButton = this.add.image(662, 1450, 'ShareLink').setScale(0.17).setInteractive();
+
         const inviteFriendsButton = this.add.image(512, 1580, 'InviteFriends').setScale(0.17).setInteractive();
 
         // Button interactions
         playButton.on('pointerdown', () => {
+            this.scene.start('Achievement');
             console.log('Play Clicked');
         });
 
@@ -95,13 +102,23 @@ export class HallOfFame extends Phaser.Scene {
         });
 
         shareOnXButton.on('pointerdown', () => {
-            console.log('Share on X Clicked');
+            this.shareOnX();
+        });
+
+        shareOnFBButton.on('pointerdown', () => {
+            this.shareOnFacebook();
+        });
+
+        shareLinkButton.on('pointerdown', () => {
+            this.copyLinkToClipboard();
         });
 
         this.addHoverEffect(playButton);
         this.addHoverEffect(exitButton);
         this.addHoverEffect(inviteFriendsButton);
         this.addHoverEffect(shareOnXButton);
+        this.addHoverEffect(shareOnFBButton);
+        this.addHoverEffect(shareLinkButton);
 
         const bonusText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
         this.addTypingEffect(512, 1720, bonusText, { 
@@ -110,6 +127,31 @@ export class HallOfFame extends Phaser.Scene {
             color: '#ffffff',
             lineSpacing: 5
         });
+    }
+
+    // Function to share on X (formerly Twitter)
+    shareOnX() {
+        const message = encodeURIComponent('Check out my score in the game! #BestGameEver');
+        const url = 'https://x.com/intent/tweet?text=' + message;
+        window.open(url, '_blank');
+    }
+
+    // Function to share on Facebook
+    shareOnFacebook() {
+        const url = encodeURIComponent(window.location.href); // Share the game URL
+        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        window.open(fbUrl, '_blank');
+    }
+
+    // Function to copy the game link to clipboard
+    copyLinkToClipboard() {
+        const dummy = document.createElement('textarea');
+        document.body.appendChild(dummy);
+        dummy.value = window.location.href;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        alert('Game link copied to clipboard!');
     }
 
     // Function to update the rank image on screen and toggle visibility

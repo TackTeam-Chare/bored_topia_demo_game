@@ -33,8 +33,6 @@ export class Leaderboard extends Phaser.Scene {
             { x: 320, y: 930 },
             { x: 320, y: 1015 },
             { x: 320, y: 1100 },
-
-   
         ];
 
         // Add the updated text objects
@@ -101,8 +99,9 @@ export class Leaderboard extends Phaser.Scene {
             console.log('Invite Friends Clicked');
         });
 
+        // Share on X Button Action
         shareOnXButton.on('pointerdown', () => {
-            console.log('Share on X Clicked');
+            this.shareOnX();
         });
 
         this.addHoverEffect(playButton);
@@ -128,6 +127,13 @@ export class Leaderboard extends Phaser.Scene {
             callbackScope: this,
             loop: true
         });
+    }
+
+    shareOnX() {
+        // Example message to be shared
+        const message = encodeURIComponent('Check out the top scores in the game!');
+        const url = `https://x.com/intent/tweet?text=${message}`;
+        window.open(url, '_blank');
     }
 
     addHoverEffect(button) {

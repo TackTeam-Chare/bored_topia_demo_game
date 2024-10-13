@@ -1,5 +1,9 @@
-import { Scene } from 'phaser';
-import { Noise } from 'noisejs';
+import {
+    Scene
+} from 'phaser';
+import {
+    Noise
+} from 'noisejs';
 
 export class ClickerGame extends Scene {
     constructor() {
@@ -8,13 +12,11 @@ export class ClickerGame extends Scene {
         this.noiseOffset = 0;
         this.isGameOver = false; // State to check if the game is over
         this.soundOn = true; // Variable to track sound state
-        this.tokenBalanceMultiplier = 1; // Multiplier based on token balance
     }
 
     init(data) {
-        this.userAddress = data.userAddress || '';  // Capture user address from HowToPlay scene
-        this.tokenBalance = data.tokenBalance || 0;
-        this.tokenBalanceMultiplier = this.tokenBalance ? parseFloat(this.tokenBalance) : 1; // Use token balance as multiplier
+        this.userAddress = data.userAddress || ''; // Capture user address from HowToPlay scene
+        this.tokenBalance = data.tokenBalance || '';
     }
 
     preload() {
@@ -37,12 +39,12 @@ export class ClickerGame extends Scene {
         this.score = 0;
         this.coins = [];
         this.isGameOver = false; // Start as false
-
+    
         const bg = this.add.image(0, 0, 'PlayPage').setOrigin(0, 0);
         bg.setDisplaySize(this.scale.width, this.scale.height);
-
+    
         const coinDispenser = this.add.image(512, 330, 'CoinDispenser').setScale(0.15);
-
+    
         this.tweens.add({
             targets: coinDispenser,
             y: 170,
@@ -51,13 +53,13 @@ export class ClickerGame extends Scene {
             yoyo: true,
             repeat: -1
         });
-
+    
         // Position the wallet, score, and time icons
         const topMargin = 30;
         const timeBg = this.add.image(140, 200 + topMargin, 'Clock').setDisplaySize(240, 75).setAlpha(1);
         const scoreBg = this.add.image(850, 200 + topMargin, 'Score').setDisplaySize(230, 75).setAlpha(1);
-        const walletIcon = this.add.image(850, 80 + topMargin, 'wallet').setDisplaySize(290, 110).setAlpha(1);
-
+        const walletIcon = this.add.image(850, 80 + topMargin, 'wallet').setDisplaySize(240, 95).setAlpha(1);
+    
         const textStyle = {
             fontFamily: 'Arial Black',
             fontSize: '26px',
@@ -66,67 +68,68 @@ export class ClickerGame extends Scene {
             strokeThickness: 3
         };
 
-        // Show the user address on the wallet
-        const shortAddress = `${this.userAddress.slice(0, 6)}...${this.userAddress.slice(-4)}`;
-        this.add.text(walletIcon.x + 40, walletIcon.y + 25, ` ${shortAddress}`, textStyle).setOrigin(0.5, 0.5);
-        this.scoreText = this.add.text(scoreBg.x, scoreBg.y, '0', textStyle).setOrigin(0.5).setDepth(1);
+        const shortAddress = `${this.userAddress.slice(0, 4)}${this.userAddress.slice(-4)}`;
+        this.add.text(walletIcon.x + 40, walletIcon.y + 15, ` ${shortAddress}`, textStyle).setOrigin(0.5, 0.5);
+    
+        this.scoreText = this.add.text(scoreBg.x+30, scoreBg.y, '0', textStyle).setOrigin(0.5).setDepth(1);
         this.timeText = this.add.text(timeBg.x, timeBg.y, '10', textStyle).setOrigin(0.3).setDepth(1);
-
+    
         // Play button and rearranged buttons
         const playButton = this.add.image(512, 1600, 'play_button').setInteractive().setScale(0.22);
-
+    
         const buttonScale = 0.6;
         const buttonY = playButton.y + 45;
         const buttonSpacing = 105;
-
+    
         // Rearrange the buttons
         const leaderboardButton = this.add.image(playButton.x - 1.5 * buttonSpacing, buttonY, 'button_leaderboard').setScale(buttonScale).setInteractive();
         const soundButton = this.add.image(playButton.x - 0.5 * buttonSpacing, buttonY, 'button_sound_on').setScale(buttonScale).setInteractive();
         const settingButton = this.add.image(playButton.x + 0.5 * buttonSpacing, buttonY, 'button_setting').setScale(buttonScale).setInteractive();
         const exitButton = this.add.image(playButton.x + 1.5 * buttonSpacing, buttonY, 'button_exit').setScale(buttonScale).setInteractive();
-
+    
         // Add hover effect
         this.addHoverEffect(soundButton);
         this.addHoverEffect(settingButton);
         this.addHoverEffect(exitButton);
         this.addHoverEffect(leaderboardButton);
-
+    
         // Sound Button Toggle
         soundButton.on('pointerdown', () => {
             this.soundOn = !this.soundOn;
             soundButton.setTexture(this.soundOn ? 'button_sound_on' : 'button_sound_off');
         });
-
+    
         // Leaderboard Button Action
         leaderboardButton.on('pointerdown', () => {
-            this.scene.start('Leaderboard');  
+            this.scene.start('Leaderboard');
             console.log('Open Leaderboard');
         });
-
+    
         // Settings Button Action
         settingButton.on('pointerdown', () => {
             console.log('Open Settings');
         });
-
+    
         // Exit Button Action
         exitButton.on('pointerdown', () => {
             console.log('Exit Game');
             this.scene.start('MainMenu');
         });
-
+    
         // Set the world bounds to the entire visible screen
         this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
-
+    
         // Timer initialization (ensure it's set correctly)
         this.timer = this.time.addEvent({
             delay: 15000,
             callback: () => this.gameOver() // End the game after 15 seconds
         });
-
+    
         this.scheduleNextCoinDrop();
-
+    
         this.input.on('gameobjectdown', (pointer, gameObject) => this.clickCoin(gameObject));
     }
+    
 
     addHoverEffect(button) {
         button.on('pointerover', () => button.setScale(button.scaleX * 1.2));
@@ -155,21 +158,54 @@ export class ClickerGame extends Scene {
         const x = dispenserX + Phaser.Math.Between(-30, 30);
         const y = dispenserY + Phaser.Math.Between(-10, 10);
 
-        const coinTypes = [
-            { key: 'coinBonze', rotateAnim: 'Bonze_rotate', vanishAnim: 'Bonze_vanish', score: 1, weight: 50 },
-            { key: 'coinSilver', rotateAnim: 'Silver_rotate', vanishAnim: 'Silver_vanish', score: 2, weight: 30 },
-            { key: 'coinGoldx2', rotateAnim: 'Goldx2_rotate', vanishAnim: 'Goldx2_vanish', score: 10, weight: 20 },
-            { key: 'coinGoldx3', rotateAnim: 'Goldx3_rotate', vanishAnim: 'Goldx3_vanish', score: 30, weight: 10 },
-            { key: 'coinGoldx4', rotateAnim: 'Goldx4_rotate', vanishAnim: 'Goldx4_vanish', score: 50, weight: 5 },
-            { key: 'coinGoldx5', rotateAnim: 'Goldx5_rotate', vanishAnim: 'Goldx5_vanish', score: 100, weight: 2 }
+        const coinTypes = [{
+                key: 'coinBonze',
+                rotateAnim: 'Bonze_rotate',
+                vanishAnim: 'Bonze_vanish',
+                score: 1,
+                weight: 50
+            },
+            {
+                key: 'coinSilver',
+                rotateAnim: 'Silver_rotate',
+                vanishAnim: 'Silver_vanish',
+                score: 2,
+                weight: 30
+            },
+            {
+                key: 'coinGoldx2',
+                rotateAnim: 'Goldx2_rotate',
+                vanishAnim: 'Goldx2_vanish',
+                score: 10,
+                weight: 20
+            },
+            {
+                key: 'coinGoldx3',
+                rotateAnim: 'Goldx3_rotate',
+                vanishAnim: 'Goldx3_vanish',
+                score: 30,
+                weight: 10
+            },
+            {
+                key: 'coinGoldx4',
+                rotateAnim: 'Goldx4_rotate',
+                vanishAnim: 'Goldx4_vanish',
+                score: 50,
+                weight: 5
+            },
+            {
+                key: 'coinGoldx5',
+                rotateAnim: 'Goldx5_rotate',
+                vanishAnim: 'Goldx5_vanish',
+                score: 100,
+                weight: 2
+            }
         ];
 
         const randomCoinType = this.weightedRandom(coinTypes);
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
 
         coin.setScale(1.5);
-        coin.setInteractive(new Phaser.Geom.Circle(coin.width / 2, coin.height / 2, 40), Phaser.Geom.Circle.Contains); // Add hit area to improve click accuracy
-
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
 
@@ -214,11 +250,9 @@ export class ClickerGame extends Scene {
         coin.disableInteractive();
         coin.body.setVelocity(0, 0); // Ensure the body exists before setting velocity
         coin.play(coin.coinType.vanishAnim);
-
-        // Apply token balance multiplier to the score
-        const finalScore = coin.coinType.score * this.tokenBalanceMultiplier;
-
-        if (this.soundOn) {  // Play sound only if sound is on
+    
+        // Play sound only if sound is on
+        if (this.soundOn) {
             switch (coin.coinType.key) {
                 case 'coinBonze':
                     this.sound.play('coin_Bonze');
@@ -236,7 +270,17 @@ export class ClickerGame extends Scene {
                     this.sound.play('coin_Gold');
             }
         }
-
+    
+        // Applying the score multiplier based on the tokenBalance
+        let scoreMultiplier = 1;
+        if (this.tokenBalance && parseFloat(this.tokenBalance) > 0) {
+            scoreMultiplier = parseFloat(this.tokenBalance);  // Use tokenBalance as a multiplier
+        }
+    
+        // Calculate final score by applying tokenBalance and existing score multiplier
+        const finalScore = coin.coinType.score * scoreMultiplier;
+    
+        // Display the final score on the screen
         const scoreText = this.add.text(coin.x, coin.y, `+${finalScore}`, {
             fontFamily: 'Arial Black',
             fontSize: '40px',
@@ -244,7 +288,8 @@ export class ClickerGame extends Scene {
             stroke: '#000000',
             strokeThickness: 6
         }).setOrigin(0.5);
-
+    
+        // Animate the score display
         this.tweens.add({
             targets: scoreText,
             y: coin.y - 50,
@@ -254,14 +299,18 @@ export class ClickerGame extends Scene {
             ease: 'Cubic.easeOut',
             onComplete: () => scoreText.destroy()
         });
-
+    
         coin.once('animationcomplete-' + coin.coinType.vanishAnim, () => coin.destroy());
-
+    
+        // Add the calculated final score to the overall game score
         this.score += finalScore;
         this.scoreText.setText(this.score.toString());
-
+    
+        // Drop the next coin
         this.dropCoin();
     }
+    
+
 
     update() {
         if (this.timer) {
@@ -288,26 +337,27 @@ export class ClickerGame extends Scene {
                 coin.play(coin.coinType.vanishAnim);
             }
         });
-    
+
         this.input.off('gameobjectdown');
         const highscore = this.registry.get('highscore');
         if (this.score > highscore) {
             this.registry.set('highscore', this.score);
         }
-    
+
         // Check if the user is logged in with MetaMask, submit score only if logged in
         if (this.userAddress) {
             this.submitScore();
         } else {
             console.log('Trial mode: Score not submitted.');
         }
-    
+
         this.time.delayedCall(2000, () => this.scene.start('GameOver'));
     }
-    
-    submitScore() {
+
+    submitScore() { 
         const score = this.score;
         const userAddress = this.userAddress;
+        const tokenBalance = this.tokenBalance;  // Make sure tokenBalance is already set
     
         // Make sure we don't submit the score if userAddress is empty (trial mode)
         if (!userAddress) {
@@ -315,15 +365,25 @@ export class ClickerGame extends Scene {
             return;
         }
     
+        // Ensure that tokenBalance has a valid value before submitting, otherwise set it to 0
+        const balanceToSubmit = tokenBalance !== undefined ? tokenBalance : 0;
+    
+        // Perform the fetch request to submit the score along with tokenBalance
         fetch('http://localhost:3000/submit-score', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userAddress, score }),
-        })
-        .then(response => response.text())
-        .then(data => console.log('Score submitted:', data))
-        .catch(error => console.error('Error submitting score:', error));
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userAddress: userAddress,
+                    score: score,
+                    tokenBalance: balanceToSubmit,  // Use the token balance safely
+                }),
+            })
+            .then(response => response.text())
+            .then(data => console.log('Score submitted:', data))
+            .catch(error => console.error('Error submitting score:', error));
     }
+    
+
 }
