@@ -13,6 +13,7 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
+    "ethers": "^6.13.4",
     "noisejs": "^2.1.0",
     "phaser": "^3.80.1",
     "web3": "^4.13.0"

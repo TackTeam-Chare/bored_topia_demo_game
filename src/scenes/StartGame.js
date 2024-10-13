@@ -8,7 +8,10 @@ export class ClickerGame extends Scene {
         this.noiseOffset = 0;
         this.isGameOver = false; // สถานะเพื่อตรวจสอบว่าเกมจบหรือยัง
     }
-
+    init(data) {
+        this.userAddress = data.userAddress || '';  // Capture user address from HowToPlay scene
+        this.tokenBalance = data.tokenBalance || '';
+    }
     preload() {
         this.load.audio('coin_Bonze', 'assets/sounds/coin_Bonze.mp3');
         this.load.audio('coin_Gold_X', 'assets/sounds/coin_Gold_X.mp3');
@@ -49,16 +52,19 @@ export class ClickerGame extends Scene {
         const topMargin = 30;
         const timeBg = this.add.image(140, 200 + topMargin, 'Clock').setDisplaySize(240, 75).setAlpha(1);
         const scoreBg = this.add.image(850, 200 + topMargin, 'Score').setDisplaySize(230, 75).setAlpha(1);
-        const walletIcon = this.add.image(850, 80 + topMargin, 'wallet').setDisplaySize(230, 100).setAlpha(1);
-    
+        const walletIcon = this.add.image(850, 80 + topMargin, 'wallet').setDisplaySize(290, 110).setAlpha(1);
+
         const textStyle = {
             fontFamily: 'Arial Black',
-            fontSize: '30px',
+            fontSize: '26px',
             color: '#ffffff',
             stroke: '#000000',
-            strokeThickness: 6
+            strokeThickness: 3
         };
-    
+        
+          // Show the user address on the wallet
+        const shortAddress = `${this.userAddress.slice(0, 6)}...${this.userAddress.slice(-4)}`;
+        this.add.text(walletIcon.x+40, walletIcon.y+25, ` ${shortAddress}`, textStyle).setOrigin(0.5, 0.5); 
         this.scoreText = this.add.text(scoreBg.x, scoreBg.y, '0', textStyle).setOrigin(0.5).setDepth(1);
         this.timeText = this.add.text(timeBg.x, timeBg.y, '10', textStyle).setOrigin(0.3).setDepth(1);
     
@@ -260,7 +266,6 @@ export class ClickerGame extends Scene {
     update() {
         if (this.timer) {
             const remainingTime = Math.ceil(this.timer.getRemainingSeconds());
-
             const hours = Math.floor(remainingTime / 3600);
             const minutes = Math.floor((remainingTime % 3600) / 60);
             const seconds = remainingTime % 60;
@@ -292,4 +297,5 @@ export class ClickerGame extends Scene {
 
         this.time.delayedCall(2000, () => this.scene.start('GameOver'));
     }
+    
 }

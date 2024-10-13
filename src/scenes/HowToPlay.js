@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { getUserBlobzBalance } from '../lobzTokenChecker.js';
 
 export class HowToPlay extends Scene {
     constructor() {
@@ -6,6 +7,8 @@ export class HowToPlay extends Scene {
         this.typingText = '';
         this.fullText = 'Click on the falling coins \nto boost your score'; 
         this.textIndex = 0;
+        this.userAddress = '';  // Initialize userAddress as an empty string
+        this.tokenBalance = '';  // Initialize tokenBalance as an empty string
     }
 
     preload() {
@@ -51,58 +54,66 @@ export class HowToPlay extends Scene {
 
         this.typeText(instructionsText);
 
+        // Add buttons (Play, Skip, Connect Wallet)
         this.createButtons();
+        
+        // Listen for wallet connection event
+        document.addEventListener('walletConnected', (event) => {
+            const { userAddress, tokenBalance } = event.detail;
+
+            // Log connection success
+            console.log('Wallet connected successfully:', userAddress);
+
+            // Automatically start the ClickerGame scene upon successful connection
+            this.scene.start('ClickerGame', { userAddress, tokenBalance });
+        });
     }
 
     createButtons() {
-        // Play button
+        // Play button (remains for manual testing if needed)
         const playButton = this.add.image(350, 620, 'buttonPlay').setInteractive().setScale(0.6);
         playButton.on('pointerdown', () => {
             this.scene.start('ClickerGame');  // Start the clicker game scene
         });
-        // เพิ่ม hover effect สำหรับปุ่ม Play
         this.addHoverEffect(playButton);
-    
-        // Skip button
+
+        // Skip button (remains for manual testing if needed)
         const skipButton = this.add.image(650, 620, 'buttonSkip').setInteractive().setScale(0.6);
         skipButton.on('pointerdown', () => {
             this.scene.start('ClickerGame');  // Skip and start the clicker game scene
         });
-        // เพิ่ม hover effect สำหรับปุ่ม Skip
         this.addHoverEffect(skipButton);
-    
-        // Connect Wallet button (centered)
+
+        // Connect Wallet button
         const centerX = this.cameras.main.width / 2;
         const connectWalletButton = this.add.image(centerX, 780, 'connectWallet').setInteractive().setScale(0.15);
         connectWalletButton.on('pointerdown', () => {
-            console.log('Wallet connected!');  // Placeholder for connecting wallet functionality
+            getUserBlobzBalance();  // Trigger the MetaMask connection function
         });
-        // เพิ่ม hover effect สำหรับปุ่ม Connect Wallet
         this.addHoverEffect(connectWalletButton);
     }
     
     addHoverEffect(button) {
-        // เมื่อเมาส์เลื่อนเข้าเปลี่ยนสเกลเพิ่มขึ้นเล็กน้อย
+        // When the mouse hovers, scale up slightly
         button.on('pointerover', () => {
             button.setScale(button.scaleX * 1.1);
         });
-    
-        // เมื่อเมาส์เลื่อนออก กลับคืนสู่ขนาดปกติ
+
+        // When the mouse leaves, revert to normal scale
         button.on('pointerout', () => {
             button.setScale(button.scaleX / 1.1);
         });
     }
-    
 
     typeText(instructionsText) {
-        // เพิ่มทีละตัวอักษร พร้อม animation
+        // Type out text one character at a time with animation
         if (this.textIndex < this.fullText.length) {
             this.typingText += this.fullText[this.textIndex];
-            instructionsText.setText(this.typingText); // แสดงข้อความทีละตัว
+            instructionsText.setText(this.typingText);
             this.textIndex++;
 
-            // ใช้ delayedCall เพื่อทำให้การพิมพ์สมูท (หน่วงเวลา)
-            this.time.delayedCall(50, () => this.typeText(instructionsText)); // 50ms ต่อ 1 ตัวอักษร
+            this.time.delayedCall(50, () => this.typeText(instructionsText));  // 50ms per character
         }
     }
 }
+
