@@ -1,4 +1,38 @@
-export class Leaderboard extends Phaser.Scene {
+export class Leaderboard extends Phaser.Scene { 
+    fetchLeaderboard() {
+        fetch('http://localhost:3000/leaderboard')
+            .then(response => response.json())
+            .then(data => {
+                // Coordinates for leaderboard slots
+                const leaderboardSlots = [
+                    { x: 200, y: 200 }, // Position for the first slot (1st place)
+                    { x: 200, y: 260 }, // Position for the second slot (2nd place)
+                    { x: 200, y: 320 }, // Position for the third slot (3rd place)
+                    { x: 200, y: 380 }, // Continue for other ranks
+                    { x: 200, y: 440 },
+                    { x: 200, y: 500 },
+                    { x: 200, y: 560 },
+                    { x: 200, y: 620 },
+                    { x: 200, y: 680 },
+                    { x: 200, y: 740 },
+                    { x: 200, y: 800 },
+                    { x: 200, y: 860 }
+                ];
+
+                data.forEach((player, index) => {
+                    if (index < 12) { // Only show top 12 players
+                        const { x, y } = leaderboardSlots[index];
+                        this.add.text(x, y, `${index + 1}. ${player.userAddress}: ${player.score}`, {
+                            fontSize: '32px',
+                            fill: '#fff',
+                            fontFamily: 'Arial Black'
+                        });
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching leaderboard:', error));
+    }
+
     constructor() {
         super('Leaderboard');
     }
@@ -15,7 +49,7 @@ export class Leaderboard extends Phaser.Scene {
     create() {
         const score = this.registry.get('highscore');
 
-        // Set up the background and house image
+        // Set up the background
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
         const stars = this.add.image(512, 680, `Leader_board`).setOrigin(0.5);
         this.tweens.add({
@@ -36,22 +70,19 @@ export class Leaderboard extends Phaser.Scene {
         // Button click interactions
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
-
+            this.scene.start('HallOfFame'); // Go to HallOfFame scene
         });
 
         exitButton.on('pointerdown', () => {
             console.log('Exit Clicked');
-
         });
 
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
-
         });
 
         shareOnXButton.on('pointerdown', () => {
             console.log('Share on X Clicked');
-
         });
 
         this.addHoverEffect(playButton);
@@ -67,11 +98,8 @@ export class Leaderboard extends Phaser.Scene {
             lineSpacing: 5
         });
 
-        // Return to the main menu when clicking anywhere
-        this.input.once('pointerdown', () => {
-            this.registry.set('highscore', 0);
-            this.scene.start('HallOfFame');
-        });
+        // Fetch and display leaderboard data
+        this.fetchLeaderboard();
     }
 
     addHoverEffect(button) {
