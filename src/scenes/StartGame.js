@@ -353,7 +353,7 @@ export class ClickerGame extends Scene {
         } else {
             console.log('Trial mode: Score not submitted.');
         }
-
+        // this.registry.set('highscore', this.score);
         this.time.delayedCall(2000, () => {
             this.scene.start('GameOver', {
                 score: this.score,
@@ -362,39 +362,31 @@ export class ClickerGame extends Scene {
         });
     }
 
-    submitScore() { 
-        const score = this.score;
-        const userAddress = this.userAddress;
-        const tokenBalance = this.tokenBalance;  // Make sure tokenBalance is already set
+    submitScore() {
+        const userAddress = this.registry.get('userAddress') || this.userAddress;
+        const score = this.registry.get('highscore') || this.score;
+        const tokenBalance = this.tokenBalance !== undefined ? this.tokenBalance : 0;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     
-        // Make sure we don't submit the score if userAddress is empty (trial mode)
         if (!userAddress) {
-            console.log('User is not logged in with MetaMask, skipping score submission.');
+            console.log('User not logged in, score not submitted.');
             return;
         }
     
-        // Ensure that tokenBalance has a valid value before submitting, otherwise set it to 0
-        const balanceToSubmit = tokenBalance !== undefined ? tokenBalance : 0;
-    
-        // Get the API URL from environment variables
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Default to localhost if not found
-    
-        // Perform the fetch request to submit the score along with tokenBalance
         fetch(`${apiUrl}/submit-score`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userAddress: userAddress,
-                    score: score,
-                    tokenBalance: balanceToSubmit,  // Use the token balance safely
-                }),
-            })
-            .then(response => response.text())
-            .then(data => console.log('Score submitted:', data))
-            .catch(error => console.error('Error submitting score:', error));
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userAddress: userAddress,
+                score: score,
+                tokenBalance: tokenBalance,
+            }),
+        })
+        .then(response => response.text())
+        .then(data => console.log('Score submitted:', data))
+        .catch(error => console.error('Error submitting score:', error));
     }
+    
     
     
 

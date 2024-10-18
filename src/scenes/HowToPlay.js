@@ -1,5 +1,9 @@
-import { Scene } from 'phaser';
-import { getUserBlobzBalance } from '../lobzTokenChecker.js';
+import {
+    Scene
+} from 'phaser';
+import {
+    getUserBlobzBalance
+} from '../lobzTokenChecker.js';
 
 export class HowToPlay extends Scene {
     constructor() {
@@ -59,13 +63,20 @@ export class HowToPlay extends Scene {
         this.createButtons();
 
         document.addEventListener('walletConnected', async (event) => {
-            const { userAddress, tokenBalance } = event.detail;
+            const {
+                userAddress,
+                tokenBalance
+            } = event.detail;
 
             this.userAddress = userAddress;
             this.tokenBalance = tokenBalance;
             this.isTrialMode = false; // Set trial mode to false on login
 
-            console.log('Wallet connected successfully:', userAddress);
+            console.log(`Wallet connected: ${userAddress}, Balance: ${tokenBalance}`);
+
+            // **บันทึกข้อมูลลงใน registry ของ Phaser**
+            this.registry.set('userAddress', userAddress);
+            this.registry.set('tokenBalance', tokenBalance);
 
             await this.assignRoom(); // Assign room after login
             this.startGame(); // Automatically start the game
@@ -102,13 +113,17 @@ export class HowToPlay extends Scene {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/assign-room`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userAddress: this.userAddress })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userAddress: this.userAddress
+                })
             });
-    
+
             const data = await response.json();
             if (response.ok) {
-                this.roomId = data.roomId;  // ตรวจสอบว่า roomId ได้รับค่า
+                this.roomId = data.roomId; // ตรวจสอบว่า roomId ได้รับค่า
                 console.log(`Assigned to Room ID: ${this.roomId}`);
             } else {
                 console.error('Failed to assign room:', data);
@@ -117,7 +132,7 @@ export class HowToPlay extends Scene {
             console.error('Error assigning room:', error);
         }
     }
-    
+
 
     startGame() {
         console.log(`Starting game with Room ID: ${this.roomId}`);

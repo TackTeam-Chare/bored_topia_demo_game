@@ -18,6 +18,7 @@ export class GameOver extends Phaser.Scene {
         const score = data.score || 0;
         const roomId = data.roomId || 'N/A';
         console.log(`Game over screen for Room ID: ${roomId}, Score: ${score}`);
+        this.registry.set('highscore', score);
         // Set up the background and house image
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
         const animatedHouse = this.add.image(512, 300, 'LevelCompletePage').setScale(0.15).setOrigin(0.5);
@@ -113,11 +114,11 @@ export class GameOver extends Phaser.Scene {
             lineSpacing: 5
         });
 
-        // Return to the main menu when clicking anywhere
-        this.input.once('pointerdown', () => {
-            this.registry.set('highscore', 0);
-            this.scene.start('Leaderboard', { roomId: this.roomId });
-        });
+        // // Return to the main menu when clicking anywhere
+        // this.input.once('pointerdown', () => {
+        //     this.registry.set('highscore', 0);
+        //     this.scene.start('Leaderboard', { roomId: this.roomId });
+        // });
     }
 
     addHoverEffect(button) {
