@@ -1,6 +1,11 @@
-export class HallOfFame extends Phaser.Scene {
+export class HallOfFame extends Phaser.Scene { 
     constructor() {
         super('HallOfFame');
+        this.hallOfFameData = [];  // Store Hall of Fame data
+        this.currentPage = 0;      // Current page being viewed
+        this.pageSize = 12;        // Number of players per page
+        this.playerTexts = [];     // Store displayed player texts
+        this.rankImages = ['1-12', '13-24', '25-36', '37-48'];
     }
 
     preload() {
@@ -9,177 +14,178 @@ export class HallOfFame extends Phaser.Scene {
         this.load.image('Hall_of_fame', 'assets/ui/background/Hall_of_fame.png');
         this.load.image('InviteFriends', 'assets/ui/background/Invite_friends.png');
         this.load.image('ShareOnX', 'assets/ui/background/Share_on_X.png');
-        this.load.image('ShareOnFB', 'assets/ui/background/Share_on_FB.png'); // Add Facebook Share icon
-        this.load.image('ShareLink', 'assets/ui/background/Share_link.png');  // Add Copy Link icon
         this.load.image('button_exit', 'assets/ui/background/button_exit.svg');
         this.load.image('button_play2', 'assets/ui/background/button_play2.svg');
-
-        // Load scroll bar and arrow
         this.load.image('scrollArrow', 'assets/ui/background/button_scroll_arrow.svg');
         this.load.image('scrollBar', 'assets/ui/background/button_scroll_bar.svg');
 
-        // Load rank images (1-12, 13-24, 25-36, 37-48)
-        this.load.image('rank13-24', 'assets/ui/background/13-24.png');
-        this.load.image('rank25-36', 'assets/ui/background/25-36.png');
-        this.load.image('rank37-48', 'assets/ui/background/37-48.png');
+        // Load rank images
+        this.rankImages.forEach(img => {
+            this.load.image(img, `assets/ui/background/${img}.png`);
+        });
     }
 
     create() {
         // Set up the background
-        const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
-        const leaderboardBackground = this.add.image(512, 700, 'Hall_of_fame').setOrigin(0.5).setScale(0.45);
+        this.add.image(512, 384, 'BG').setOrigin(0.5);
+        this.add.image(512, 700, 'Hall_of_fame').setOrigin(0.5).setScale(0.45);
 
-        // Images for different ranks
-        const rankImages = ['rank13-24', 'rank25-36', 'rank37-48'];
-        let currentIndex = -1; // No rank images visible initially
+        // Initialize the rank image
+        this.currentRankImage = this.add.image(475, 685, this.rankImages[0])
+            .setOrigin(0.5)
+            .setScale(0.45)
+            .setVisible(true);
 
-        // Create the rank image holder, but keep it invisible
-        let currentRankImage = this.add.image(475, 685, rankImages[0]).setOrigin(0.5).setScale(0.45).setVisible(false);
+        // Scroll Bar and Arrows
+        const scrollBar = this.add.image(780, 620, 'scrollBar').setScale(5, 5);
 
-        // Scroll bar
-        const scrollBar = this.add.image(780, 620, 'scrollBar').setScale(5, 5);  // Positioned centrally for better alignment
+        const scrollUpButton = this.add.image(
+            scrollBar.x, 
+            scrollBar.y - scrollBar.displayHeight / 2, 
+            'scrollArrow'
+        ).setScale(0.4).setInteractive();
 
-        // Scroll arrows (up and down) positioned on top and bottom of the scrollBar
-        const scrollUpButton = this.add.image(scrollBar.x, scrollBar.y - scrollBar.displayHeight / 2, 'scrollArrow').setScale(0.4).setInteractive();
-        const scrollDownButton = this.add.image(scrollBar.x, scrollBar.y + scrollBar.displayHeight / 2, 'scrollArrow').setScale(0.4).setInteractive().setFlipY(true);
+        const scrollDownButton = this.add.image(
+            scrollBar.x, 
+            scrollBar.y + scrollBar.displayHeight / 2, 
+            'scrollArrow'
+        ).setScale(0.4).setInteractive().setFlipY(true);
 
-        // Scroll up button functionality
-        scrollUpButton.on('pointerdown', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                this.updateRankImage(currentRankImage, rankImages[currentIndex], true);
-            } else if (currentIndex === 0) {
-                currentIndex = -1;  // Go back to no rank image displayed
-                currentRankImage.setVisible(false);
-            }
-        });
+        // Add hover effects to scroll buttons
+        this.addHoverEffect(scrollUpButton, 'Scroll Up Hovered');
+        this.addHoverEffect(scrollDownButton, 'Scroll Down Hovered');
 
-        // Scroll down button functionality
-        scrollDownButton.on('pointerdown', () => {
-            if (currentIndex < rankImages.length - 1) {
-                currentIndex++;
-                this.updateRankImage(currentRankImage, rankImages[currentIndex], true);
-            }
-        });
+        // Scroll button functionality
+        scrollUpButton.on('pointerdown', () => this.scrollUp());
+        scrollDownButton.on('pointerdown', () => this.scrollDown());
 
-        // Set up scrolling with the mouse wheel
+        // Scroll wheel support
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            if (deltaY > 0 && currentIndex < rankImages.length - 1) {
-                currentIndex++;
-                this.updateRankImage(currentRankImage, rankImages[currentIndex], true);
-            } else if (deltaY < 0 && currentIndex > 0) {
-                currentIndex--;
-                this.updateRankImage(currentRankImage, rankImages[currentIndex], true);
-            } else if (deltaY < 0 && currentIndex === 0) {
-                currentIndex = -1;  // Go back to no rank image displayed
-                currentRankImage.setVisible(false);
-            }
+            if (deltaY > 0) this.scrollDown();
+            if (deltaY < 0) this.scrollUp();
         });
 
-        // Add main buttons (Play, Exit, etc.)
+        // Play and Exit buttons
         const playButton = this.add.image(400, 1240, 'button_play2').setScale(0.8).setInteractive();
         const exitButton = this.add.image(600, 1240, 'button_exit').setScale(0.8).setInteractive();
 
-        // Add share buttons (Share on X, Share on Facebook, Copy Link)
         const shareOnXButton = this.add.image(512, 1450, 'ShareOnX').setScale(0.17).setInteractive();
-        const shareOnFBButton = this.add.image(362, 1450, 'ShareOnFB').setScale(0.17).setInteractive();
-        const shareLinkButton = this.add.image(662, 1450, 'ShareLink').setScale(0.17).setInteractive();
-
-        const inviteFriendsButton = this.add.image(512, 1580, 'InviteFriends').setScale(0.17).setInteractive();
-
-        // Button interactions
+        
         playButton.on('pointerdown', () => {
-            this.scene.start('Achievement');
             console.log('Play Clicked');
+            this.scene.start('Achievement');
         });
+        exitButton.on('pointerdown', () => console.log('Exit Clicked'));
 
-        exitButton.on('pointerdown', () => {
-            console.log('Exit Clicked');
-        });
-
-        inviteFriendsButton.on('pointerdown', () => {
-            console.log('Invite Friends Clicked');
-        });
-
-        shareOnXButton.on('pointerdown', () => {
-            this.shareOnX();
-        });
-
-        shareOnFBButton.on('pointerdown', () => {
-            this.shareOnFacebook();
-        });
-
-        shareLinkButton.on('pointerdown', () => {
-            this.copyLinkToClipboard();
-        });
-
-        this.addHoverEffect(playButton);
-        this.addHoverEffect(exitButton);
-        this.addHoverEffect(inviteFriendsButton);
-        this.addHoverEffect(shareOnXButton);
-        this.addHoverEffect(shareOnFBButton);
-        this.addHoverEffect(shareLinkButton);
-
+        this.addHoverEffect(playButton, 'Play Button Hovered');
+        this.addHoverEffect(exitButton, 'Exit Button Hovered');
+        this.addHoverEffect(shareOnXButton, 'ShareOnX Button Hovered');
+        // Typing effect for bonus text
         const bonusText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
-        this.addTypingEffect(512, 1720, bonusText, { 
-            fontSize: '28px', 
-            fontFamily: 'Arial', 
+        this.addTypingEffect(512, 1720, bonusText, {
+            fontSize: '28px',
+            fontFamily: 'Arial',
             color: '#ffffff',
             lineSpacing: 5
         });
+
+        // Fetch and display Hall of Fame data
+        this.fetchHallOfFameData();
     }
 
-    // Function to share on X (formerly Twitter)
-    shareOnX() {
-        const message = encodeURIComponent('Check out my score in the game! #BestGameEver');
-        const url = 'https://x.com/intent/tweet?text=' + message;
-        window.open(url, '_blank');
-    }
-
-    // Function to share on Facebook
-    shareOnFacebook() {
-        const url = encodeURIComponent(window.location.href); // Share the game URL
-        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-        window.open(fbUrl, '_blank');
-    }
-
-    // Function to copy the game link to clipboard
-    copyLinkToClipboard() {
-        const dummy = document.createElement('textarea');
-        document.body.appendChild(dummy);
-        dummy.value = window.location.href;
-        dummy.select();
-        document.execCommand('copy');
-        document.body.removeChild(dummy);
-        alert('Game link copied to clipboard!');
-    }
-
-    // Function to update the rank image on screen and toggle visibility
-    updateRankImage(currentImage, newImageKey, shouldShow) {
-        currentImage.setTexture(newImageKey); // Swap texture of current image
-        if (shouldShow) {
-            currentImage.setVisible(true);  // Show the rank image
+    // Scroll up functionality
+    scrollUp() {
+        if (this.currentPage > 0) {
+            console.log('Scroll Up Clicked');
+            this.currentPage--;
+            this.updateRankImage();
+            this.displayPlayersForCurrentPage();
         }
     }
 
-    addHoverEffect(button) {
-        button.on('pointerover', () => button.setScale(button.scaleX * 1.1));
+    // Scroll down functionality
+    scrollDown() {
+        const totalPages = Math.ceil(this.hallOfFameData.length / this.pageSize);
+        if (this.currentPage < totalPages - 1) {
+            console.log('Scroll Down Clicked');
+            this.currentPage++;
+            this.updateRankImage();
+            this.displayPlayersForCurrentPage();
+        }
+    }
+
+    // Update rank image
+    updateRankImage() {
+        const rankImageKey = this.rankImages[this.currentPage];
+        this.currentRankImage.setTexture(rankImageKey).setVisible(true);
+        console.log(`Updated Rank Image: ${rankImageKey}`);
+    }
+
+    // Fetch Hall of Fame data from API
+    fetchHallOfFameData() {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        fetch(`${apiUrl}/hall-of-fame`)
+            .then(response => response.json())
+            .then(data => {
+                this.hallOfFameData = data;
+                console.log('Fetched Hall of Fame Data:', data);
+                this.displayPlayersForCurrentPage();
+            })
+            .catch(error => console.error('Error fetching Hall of Fame data:', error));
+    }
+
+    // Display players for the current page
+    displayPlayersForCurrentPage() {
+        const textStyle = { fontSize: '32px', color: '#ffffff', fontFamily: 'Arial Black',fill: '#fff' };
+        const startIndex = this.currentPage * this.pageSize;
+        const endIndex = Math.min(startIndex + this.pageSize, this.hallOfFameData.length);
+
+        // Disable scroll buttons if less than 12 players
+        const totalPlayers = this.hallOfFameData.length;
+        if (totalPlayers < 12) {
+            console.log('Less than 12 players, disabling scroll buttons');
+        }
+
+        // Clear previous player display
+        this.clearPlayerDisplay();
+
+        let yPos = 230;
+        for (let i = startIndex; i < endIndex; i++) {
+            const player = this.hallOfFameData[i];
+            const shortAddress = `${player.userAddress.slice(0, 4)}${player.userAddress.slice(-4)}`;
+            const playerText = this.add.text(290, yPos, `${shortAddress}         ${player.score}`, textStyle);
+            this.playerTexts.push(playerText);
+            console.log(`${shortAddress}        ${player.score}`);
+            yPos += 80;
+        }
+    }
+
+    // Clear previous player display
+    clearPlayerDisplay() {
+        this.playerTexts.forEach(text => text.destroy());
+        this.playerTexts = [];
+    }
+
+    // Add hover effect to buttons with console logging
+    addHoverEffect(button, message) {
+        button.on('pointerover', () => {
+            button.setScale(button.scaleX * 1.1);
+            console.log(message);
+        });
         button.on('pointerout', () => button.setScale(button.scaleX / 1.1));
     }
 
-    // Function to create the typing effect for the text
+    // Typing effect for bonus text
     addTypingEffect(x, y, text, style) {
         const textObject = this.add.text(x, y, '', style).setOrigin(0.5);
         let index = 0;
 
         this.time.addEvent({
-            delay: 50, // Speed of typing effect
+            delay: 50,
             callback: () => {
                 textObject.text += text[index];
                 index++;
-                if (index >= text.length) {
-                    this.time.removeAllEvents(); // Stop when finished
-                }
+                if (index >= text.length) this.time.removeAllEvents();
             },
             repeat: text.length - 1
         });

@@ -368,8 +368,11 @@ export class ClickerGame extends Scene {
         // Ensure that tokenBalance has a valid value before submitting, otherwise set it to 0
         const balanceToSubmit = tokenBalance !== undefined ? tokenBalance : 0;
     
+        // Get the API URL from environment variables
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Default to localhost if not found
+    
         // Perform the fetch request to submit the score along with tokenBalance
-        fetch('http://localhost:3000/submit-score', {
+        fetch(`${apiUrl}/submit-score`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -384,6 +387,7 @@ export class ClickerGame extends Scene {
             .then(data => console.log('Score submitted:', data))
             .catch(error => console.error('Error submitting score:', error));
     }
+    
     
 
 }

@@ -5,7 +5,9 @@ export class Leaderboard extends Phaser.Scene {
     }
 
     fetchLeaderboard() {
-        fetch('http://localhost:3000/leaderboard')
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'; 
+    
+        fetch(`${apiUrl}/leaderboard`)
             .then(response => response.json())
             .then(data => {
                 // Update the leaderboard display with real-time data
@@ -13,6 +15,7 @@ export class Leaderboard extends Phaser.Scene {
             })
             .catch(error => console.error('Error fetching leaderboard:', error));
     }
+    
 
     updateLeaderboardDisplay(data) {
         // Clear the existing text objects

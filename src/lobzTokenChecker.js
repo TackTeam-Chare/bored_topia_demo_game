@@ -1,4 +1,4 @@
-const { ethers } = window;  // Access ethers from the global object
+const { ethers } = window;  // Access ethers from the global object 
 
 // Elements from the HTML
 const connectButton = document.getElementById('connectButton');
@@ -108,7 +108,6 @@ async function getUserBlobzBalance() {
         alert('กรุณาติดตั้ง MetaMask หรือส่วนขยายกระเป๋าเงิน Ethereum อื่นๆ.');
     }
 }
-
 
 // Export the function for use in other files
 export { getUserBlobzBalance };
