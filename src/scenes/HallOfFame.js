@@ -7,7 +7,37 @@ export class HallOfFame extends Phaser.Scene {
         this.playerTexts = [];     // Store displayed player texts
         this.rankImages = ['1-12', '13-24', '25-36', '37-48'];
     }
+    init(data) {
+        // รับ roomId จาก Scene ก่อนหน้า
+        this.roomId = data.roomId || 'N/A';
+        console.log(`Received roomId: ${this.roomId} from Leaderboard`);
 
+        if (this.roomId === 'N/A') {
+            console.error('Room ID not available.');
+        } else {
+            this.fetchHallOfFameData(); // เรียกข้อมูล Hall of Fame
+        }
+    }
+
+    fetchHallOfFameData() {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+        fetch(`${apiUrl}/hall-of-fame/${this.roomId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            this.hallOfFameData = data;
+            console.log('Fetched Hall of Fame Data:', data);
+            this.displayPlayersForCurrentPage(); // แสดงข้อมูล
+        })
+        .catch(error => console.error('Error fetching Hall of Fame data:', error));
+    
+    }
+    
     preload() {
         // Load background and UI elements
         this.load.image('BG', 'assets/ui/background/BG.png');
@@ -74,13 +104,15 @@ export class HallOfFame extends Phaser.Scene {
 
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
-            this.scene.start('Achievement');
+            this.scene.start('ClickerGame');
         });
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
         });
 
-        exitButton.on('pointerdown', () => console.log('Exit Clicked'));
+        exitButton.on('pointerdown', () => {
+            this.scene.start('Achievement');
+          });
 
         this.addHoverEffect(playButton, 'Play Button Hovered');
         this.addHoverEffect(exitButton, 'Exit Button Hovered');
@@ -128,18 +160,7 @@ export class HallOfFame extends Phaser.Scene {
         console.log(`Updated Rank Image: ${rankImageKey}`);
     }
 
-    // Fetch Hall of Fame data from API
-    fetchHallOfFameData() {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        fetch(`${apiUrl}/hall-of-fame`)
-            .then(response => response.json())
-            .then(data => {
-                this.hallOfFameData = data;
-                console.log('Fetched Hall of Fame Data:', data);
-                this.displayPlayersForCurrentPage();
-            })
-            .catch(error => console.error('Error fetching Hall of Fame data:', error));
-    }
+
 
     // Display players for the current page
     displayPlayersForCurrentPage() {

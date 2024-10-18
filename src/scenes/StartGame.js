@@ -14,13 +14,13 @@ export class ClickerGame extends Scene {
         this.soundOn = true; // Variable to track sound state
     }
 
-    init(data) {
-        this.userAddress = data.userAddress || ''; 
-        this.tokenBalance = data.tokenBalance || 0;
-        this.roomId = data.roomId || 'N/A';  // ตรวจสอบว่าค่าไม่ใช่ 'N/A'
-        console.log(`Game started with Room ID: ${this.roomId}`);
-    }
-    
+   init(data) {
+    this.userAddress = data.userAddress || ''; 
+    this.tokenBalance = data.tokenBalance || 0;
+    this.roomId = data.roomId || 'N/A';  // ตรวจสอบว่าค่าไม่ใช่ 'N/A'
+    console.log(`Game started with Room ID: ${this.roomId}`);
+}
+
     preload() {
         this.load.audio('coin_Bonze', 'assets/sounds/coin_Bonze.mp3');
         this.load.audio('coin_Gold_X', 'assets/sounds/coin_Gold_X.mp3');
@@ -103,7 +103,7 @@ export class ClickerGame extends Scene {
     
         // Leaderboard Button Action
         leaderboardButton.on('pointerdown', () => {
-            this.scene.start('Leaderboard');
+            this.scene.start('Leaderboard', { roomId: this.roomId });
             console.log('Open Leaderboard');
         });
     

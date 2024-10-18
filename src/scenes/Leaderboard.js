@@ -156,8 +156,11 @@ export class Leaderboard extends Phaser.Scene {
         });
 
         exitButton.on('pointerdown', () => {
-            console.log('Exit Clicked');
+            console.log(`Exit Clicked. Sending roomId: ${this.roomId} to HallOfFame`);
+            this.scene.start('HallOfFame', { roomId: this.roomId }); // ส่ง roomId ไปยัง HallOfFame
         });
+        
+        
 
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
@@ -199,7 +202,7 @@ export class Leaderboard extends Phaser.Scene {
         const url = `https://x.com/intent/tweet?text=${message}`;
         window.open(url, '_blank');
     }
-
+    
     addHoverEffect(button) {
         button.on('pointerover', () => button.setScale(button.scaleX * 1.1));
         button.on('pointerout', () => button.setScale(button.scaleX / 1.1));
