@@ -111,11 +111,12 @@ export class HowToPlay extends Scene {
 
     async assignRoom() {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/assign-room`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}assign-room`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     userAddress: this.userAddress
                 })

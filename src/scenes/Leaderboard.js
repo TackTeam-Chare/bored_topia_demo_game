@@ -20,7 +20,7 @@ export class Leaderboard extends Phaser.Scene {
         const apiUrl =
             import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-        fetch(`${apiUrl}/leaderboard/${this.roomId}`)
+        fetch(`${apiUrl}leaderboard/${this.roomId}`)
             .then(response => response.json())
             .then(data => this.updateLeaderboardDisplay(data))
             .catch(error => console.error('Error fetching leaderboard:', error));

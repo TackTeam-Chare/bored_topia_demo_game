@@ -114,11 +114,6 @@ export class GameOver extends Phaser.Scene {
             lineSpacing: 5
         });
 
-        // // Return to the main menu when clicking anywhere
-        // this.input.once('pointerdown', () => {
-        //     this.registry.set('highscore', 0);
-        //     this.scene.start('Leaderboard', { roomId: this.roomId });
-        // });
     }
 
     addHoverEffect(button) {

@@ -373,9 +373,10 @@ export class ClickerGame extends Scene {
             return;
         }
     
-        fetch(`${apiUrl}/submit-score`, {
+        fetch(`${apiUrl}submit-score`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({
                 userAddress: userAddress,
                 score: score,

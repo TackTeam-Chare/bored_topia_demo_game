@@ -22,7 +22,7 @@ export class HallOfFame extends Phaser.Scene {
     fetchHallOfFameData() {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-        fetch(`${apiUrl}/hall-of-fame/${this.roomId}`)
+        fetch(`${apiUrl}hall-of-fame/${this.roomId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
