@@ -5,10 +5,12 @@ export class HowToPlay extends Scene {
     constructor() {
         super('HowToPlay');
         this.typingText = '';
-        this.fullText = 'Click on the falling coins \nto boost your score'; 
+        this.fullText = 'Click on the falling coins \nto boost your score';
         this.textIndex = 0;
-        this.userAddress = '';  // Initialize userAddress as an empty string
-        this.tokenBalance = '';  // Initialize tokenBalance as an empty string
+        this.userAddress = '';
+        this.tokenBalance = '';
+        this.roomId = null;
+        this.isTrialMode = true; // Start in trial mode by default
     }
 
     preload() {
@@ -22,11 +24,12 @@ export class HowToPlay extends Scene {
     }
 
     create() {
-        // Background setup
         const howToPlayBg = this.add.image(0, 0, 'howToPlayBackground').setOrigin(0, 0);
-        howToPlayBg.setScale(Math.max(this.sys.game.config.width / howToPlayBg.width, this.sys.game.config.height / howToPlayBg.height));
+        howToPlayBg.setScale(Math.max(
+            this.sys.game.config.width / howToPlayBg.width,
+            this.sys.game.config.height / howToPlayBg.height
+        ));
 
-        // How to play section image (animation)
         const howToPlay = this.add.image(512, 400, 'howToPlay').setScale(0.2);
         this.tweens.add({
             targets: howToPlay,
@@ -53,66 +56,91 @@ export class HowToPlay extends Scene {
         }).setOrigin(0.5);
 
         this.typeText(instructionsText);
-
-        // Add buttons (Play, Skip, Connect Wallet)
         this.createButtons();
-        
-        // Listen for wallet connection event
-        document.addEventListener('walletConnected', (event) => {
+
+        document.addEventListener('walletConnected', async (event) => {
             const { userAddress, tokenBalance } = event.detail;
 
-            // Log connection success
+            this.userAddress = userAddress;
+            this.tokenBalance = tokenBalance;
+            this.isTrialMode = false; // Set trial mode to false on login
+
             console.log('Wallet connected successfully:', userAddress);
 
-            // Automatically start the ClickerGame scene upon successful connection
-            this.scene.start('ClickerGame', { userAddress, tokenBalance });
+            await this.assignRoom(); // Assign room after login
+            this.startGame(); // Automatically start the game
         });
     }
 
     createButtons() {
-        // Play button (remains for manual testing if needed)
         const playButton = this.add.image(350, 620, 'buttonPlay').setInteractive().setScale(0.6);
         playButton.on('pointerdown', () => {
-            this.scene.start('ClickerGame');  // Start the clicker game scene
+            if (!this.isTrialMode && !this.roomId) {
+                console.error('Room not assigned yet.');
+            } else {
+                this.startGame(); // Start the game either way
+            }
         });
         this.addHoverEffect(playButton);
 
-        // Skip button (remains for manual testing if needed)
         const skipButton = this.add.image(650, 620, 'buttonSkip').setInteractive().setScale(0.6);
         skipButton.on('pointerdown', () => {
-            this.scene.start('ClickerGame');  // Skip and start the clicker game scene
+            console.log('Starting trial mode without login...');
+            this.isTrialMode = true; // Ensure the game runs in trial mode
+            this.startGame(); // Start game immediately in trial mode
         });
         this.addHoverEffect(skipButton);
 
-        // Connect Wallet button
-        const centerX = this.cameras.main.width / 2;
-        const connectWalletButton = this.add.image(centerX, 780, 'connectWallet').setInteractive().setScale(0.15);
+        const connectWalletButton = this.add.image(this.cameras.main.width / 2, 780, 'connectWallet').setInteractive().setScale(0.15);
         connectWalletButton.on('pointerdown', () => {
-            getUserBlobzBalance();  // Trigger the MetaMask connection function
+            getUserBlobzBalance(); // Trigger wallet connection
         });
         this.addHoverEffect(connectWalletButton);
     }
-    
-    addHoverEffect(button) {
-        // When the mouse hovers, scale up slightly
-        button.on('pointerover', () => {
-            button.setScale(button.scaleX * 1.1);
-        });
 
-        // When the mouse leaves, revert to normal scale
-        button.on('pointerout', () => {
-            button.setScale(button.scaleX / 1.1);
+    async assignRoom() {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/assign-room`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userAddress: this.userAddress })
+            });
+    
+            const data = await response.json();
+            if (response.ok) {
+                this.roomId = data.roomId;  // ตรวจสอบว่า roomId ได้รับค่า
+                console.log(`Assigned to Room ID: ${this.roomId}`);
+            } else {
+                console.error('Failed to assign room:', data);
+            }
+        } catch (error) {
+            console.error('Error assigning room:', error);
+        }
+    }
+    
+
+    startGame() {
+        console.log(`Starting game with Room ID: ${this.roomId}`);
+        this.scene.start('ClickerGame', {
+            userAddress: this.userAddress || '',
+            tokenBalance: this.tokenBalance || 0,
+            roomId: this.roomId,
+            isTrialMode: this.isTrialMode
         });
     }
 
+    addHoverEffect(button) {
+        button.on('pointerover', () => button.setScale(button.scaleX * 1.1));
+        button.on('pointerout', () => button.setScale(button.scaleX / 1.1));
+    }
+
     typeText(instructionsText) {
-        // Type out text one character at a time with animation
         if (this.textIndex < this.fullText.length) {
             this.typingText += this.fullText[this.textIndex];
             instructionsText.setText(this.typingText);
             this.textIndex++;
 
-            this.time.delayedCall(50, () => this.typeText(instructionsText));  // 50ms per character
+            this.time.delayedCall(50, () => this.typeText(instructionsText));
         }
     }
 }

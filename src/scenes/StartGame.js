@@ -15,10 +15,12 @@ export class ClickerGame extends Scene {
     }
 
     init(data) {
-        this.userAddress = data.userAddress || ''; // Capture user address from HowToPlay scene
-        this.tokenBalance = data.tokenBalance || '';
+        this.userAddress = data.userAddress || ''; 
+        this.tokenBalance = data.tokenBalance || 0;
+        this.roomId = data.roomId || 'N/A';  // ตรวจสอบว่าค่าไม่ใช่ 'N/A'
+        console.log(`Game started with Room ID: ${this.roomId}`);
     }
-
+    
     preload() {
         this.load.audio('coin_Bonze', 'assets/sounds/coin_Bonze.mp3');
         this.load.audio('coin_Gold_X', 'assets/sounds/coin_Gold_X.mp3');
@@ -331,6 +333,7 @@ export class ClickerGame extends Scene {
 
     gameOver() {
         this.isGameOver = true;
+        console.log(`Game over. Final score: ${this.score}, Room ID: ${this.roomId}`);
         this.coins.forEach(coin => {
             if (coin.active) {
                 coin.body.setVelocity(0, 0); // Fix the velocity method
@@ -351,7 +354,12 @@ export class ClickerGame extends Scene {
             console.log('Trial mode: Score not submitted.');
         }
 
-        this.time.delayedCall(2000, () => this.scene.start('GameOver'));
+        this.time.delayedCall(2000, () => {
+            this.scene.start('GameOver', {
+                score: this.score,
+                roomId: this.roomId // Send room ID to GameOver scene
+            });
+        });
     }
 
     submitScore() { 

@@ -1,21 +1,31 @@
-export class Leaderboard extends Phaser.Scene { 
+export class Leaderboard extends Phaser.Scene {
     constructor() {
         super('Leaderboard');
-        this.leaderboardTexts = [];  // Array to store text objects
+        this.leaderboardTexts = []; // Array to store text objects
+    }
+
+    init(data) {
+        // รับ Room ID จาก Scene ก่อนหน้า
+        this.roomId = data.roomId || 'N/A';
+        console.log(`Displaying leaderboard for Room ID: ${this.roomId}`);
+
+        if (this.roomId === 'N/A') {
+            console.error('Room ID not available.');
+        } else {
+            this.fetchLeaderboard(); // Fetch leaderboard if Room ID is available
+        }
     }
 
     fetchLeaderboard() {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'; 
-    
-        fetch(`${apiUrl}/leaderboard`)
+        const apiUrl =
+            import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+        fetch(`${apiUrl}/leaderboard/${this.roomId}`)
             .then(response => response.json())
-            .then(data => {
-                // Update the leaderboard display with real-time data
-                this.updateLeaderboardDisplay(data);
-            })
+            .then(data => this.updateLeaderboardDisplay(data))
             .catch(error => console.error('Error fetching leaderboard:', error));
     }
-    
+
 
     updateLeaderboardDisplay(data) {
         // Clear the existing text objects
@@ -25,34 +35,70 @@ export class Leaderboard extends Phaser.Scene {
         // Coordinates for leaderboard slots matching the layout from the image
         const leaderboardSlots = [
 
-            { x: 320, y: 290 },
-            { x: 320, y: 365 },
-            { x: 320, y: 450 },
-            { x: 320, y: 530 },
-            { x: 320, y: 610 },
-            { x: 320, y: 690 },
-            { x: 320, y: 770 },
-            { x: 320, y: 850 },
-            { x: 320, y: 930 },
-            { x: 320, y: 1015 },
-            { x: 320, y: 1100 },
+            {
+                x: 320,
+                y: 290
+            },
+            {
+                x: 320,
+                y: 365
+            },
+            {
+                x: 320,
+                y: 450
+            },
+            {
+                x: 320,
+                y: 530
+            },
+            {
+                x: 320,
+                y: 610
+            },
+            {
+                x: 320,
+                y: 690
+            },
+            {
+                x: 320,
+                y: 770
+            },
+            {
+                x: 320,
+                y: 850
+            },
+            {
+                x: 320,
+                y: 930
+            },
+            {
+                x: 320,
+                y: 1015
+            },
+            {
+                x: 320,
+                y: 1100
+            },
         ];
 
         // Add the updated text objects
         data.forEach((player, index) => {
             if (index < 12) { // Only show top 12 players
-                const { x, y } = leaderboardSlots[index];
+                const {
+                    x,
+                    y
+                } = leaderboardSlots[index];
 
                 // Trimming the user address to show the first 4 and last 4 characters
                 const trimmedAddress = `${player.userAddress.slice(0, 4)}${player.userAddress.slice(-4)}`;
-                
+
                 // Creating the text that includes the trimmed address and player score with increased spacing
                 const leaderboardText = this.add.text(x, y, `${trimmedAddress}     ${player.score}`, {
                     fontSize: '32px',
                     fill: '#fff',
                     fontFamily: 'Arial Black'
                 });
-                
+
                 this.leaderboardTexts.push(leaderboardText);
             }
         });
@@ -75,13 +121,28 @@ export class Leaderboard extends Phaser.Scene {
         const stars = this.add.image(512, 680, `Leader_board`).setOrigin(0.5);
         this.tweens.add({
             targets: stars,
-            scale: { from: 0.05, to: 0.23 },
-            alpha: { from: 0, to: 1 },
+            scale: {
+                from: 0.05,
+                to: 0.23
+            },
+            alpha: {
+                from: 0,
+                to: 1
+            },
             duration: 1000,
             ease: 'Bounce.easeOut',
         });
+        // Display Room ID in the designated area on UI
+        const roomTextStyle = {
+            fontFamily: 'Arial Black',
+            fontSize: '36px',
+            color: '#ffffff',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 3
+        };
+        this.add.text(570, 210, ` ${this.roomId}`, roomTextStyle).setOrigin(0.5);
 
-        // Adding the main buttons (Exit, Play)
         const playButton = this.add.image(400, 1240, 'button_play2').setScale(0.8).setInteractive();
         const exitButton = this.add.image(600, 1240, 'button_exit').setScale(0.8).setInteractive();
 
@@ -91,7 +152,7 @@ export class Leaderboard extends Phaser.Scene {
         // Button click interactions
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
-            this.scene.start('HallOfFame'); // Go to HallOfFame scene
+            this.scene.start('ClickerGame'); // Go to HallOfFame scene
         });
 
         exitButton.on('pointerdown', () => {

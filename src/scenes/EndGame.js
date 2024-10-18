@@ -14,9 +14,10 @@ export class GameOver extends Phaser.Scene {
         this.load.image('button_play', 'assets/ui/background/button_play.svg');
     }
 
-    create() {
-        const score = this.registry.get('highscore');
-
+    create(data) {
+        const score = data.score || 0;
+        const roomId = data.roomId || 'N/A';
+        console.log(`Game over screen for Room ID: ${roomId}, Score: ${score}`);
         // Set up the background and house image
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
         const animatedHouse = this.add.image(512, 300, 'LevelCompletePage').setScale(0.15).setOrigin(0.5);
@@ -70,21 +71,21 @@ export class GameOver extends Phaser.Scene {
         const inviteFriendsButton = this.add.image(512, 1400, 'InviteFriends').setScale(0.175).setInteractive();
         const shareOnXButton = this.add.image(512, 1550, 'ShareOnX').setScale(0.175).setInteractive();
 
-        // Button click interactions
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
-            // Add functionality here (e.g., restarting the level or moving to the next one)
+            this.scene.start('ClickerGame');
         });
-
+        
         leaderboardButton.on('pointerdown', () => {
-            console.log('Leaderboard Clicked');
-            // Add functionality here (e.g., showing the leaderboard)
+            console.log('Opening Leaderboard...');
+            this.scene.start('Leaderboard', { roomId });
         });
 
         exitButton.on('pointerdown', () => {
             console.log('Exit Clicked');
-            // Add functionality here (e.g., returning to the main menu)
+            this.scene.start('MainMenu');
         });
+        
 
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
@@ -115,7 +116,7 @@ export class GameOver extends Phaser.Scene {
         // Return to the main menu when clicking anywhere
         this.input.once('pointerdown', () => {
             this.registry.set('highscore', 0);
-            this.scene.start('Leaderboard');
+            this.scene.start('Leaderboard', { roomId: this.roomId });
         });
     }
 

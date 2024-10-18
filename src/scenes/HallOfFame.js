@@ -70,16 +70,23 @@ export class HallOfFame extends Phaser.Scene {
         const exitButton = this.add.image(600, 1240, 'button_exit').setScale(0.8).setInteractive();
 
         const shareOnXButton = this.add.image(512, 1450, 'ShareOnX').setScale(0.17).setInteractive();
-        
+        const inviteFriendsButton = this.add.image(512, 1600, 'InviteFriends').setScale(0.17).setInteractive();
+
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
             this.scene.start('Achievement');
         });
+        inviteFriendsButton.on('pointerdown', () => {
+            console.log('Invite Friends Clicked');
+        });
+
         exitButton.on('pointerdown', () => console.log('Exit Clicked'));
 
         this.addHoverEffect(playButton, 'Play Button Hovered');
         this.addHoverEffect(exitButton, 'Exit Button Hovered');
         this.addHoverEffect(shareOnXButton, 'ShareOnX Button Hovered');
+        this.addHoverEffect(inviteFriendsButton);
+        
         // Typing effect for bonus text
         const bonusText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
         this.addTypingEffect(512, 1720, bonusText, {
