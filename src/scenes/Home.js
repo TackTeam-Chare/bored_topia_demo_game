@@ -28,67 +28,57 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        let startButtonScale = Math.min(this.scale.width / 800, this.scale.height / 600) * 1.5;
-
-        const marginBottom = this.scale.height * 0.1;
-
-        const startButton = this.add.image(this.scale.width / 2, this.scale.height - marginBottom, 'Start')
+        const startButton = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Start')
             .setInteractive()
-            .setScale(startButtonScale);
+            .setScale(1.5);
 
-        startButton.setPosition(this.scale.width / 2, this.scale.height - startButton.displayHeight / 2 - marginBottom);
+        startButton.on('pointerdown', async () => {
+            const userAddress = await this.checkMetaMaskLogin();
 
-        const pulsingTween = this.tweens.add({
-            targets: startButton,
-            scaleX: startButtonScale * 0.95,
-            scaleY: startButtonScale * 0.95,
-            duration: 1000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
-
-
-        startButton.on('pointerover', () => {
-            pulsingTween.pause();
-            this.tweens.add({
-                targets: startButton,
-                scaleX: startButtonScale * 1.05,
-                scaleY: startButtonScale * 1.05,
-                duration: 200,
-                ease: 'Sine.easeInOut'
-            });
-        });
-
-        startButton.on('pointerout', () => {
-            this.tweens.add({
-                targets: startButton,
-                scaleX: startButtonScale * 0.95,
-                scaleY: startButtonScale * 0.95,
-                duration: 200,
-                ease: 'Sine.easeInOut',
-                onComplete: () => {
-                    pulsingTween.resume();
-                }
-            });
-        });
-
-        startButton.on('pointerdown', () => {
-            this.time.delayedCall(500, () => {
-                startButton.setTexture('Load_1');
-            });
-
-            this.time.delayedCall(1000, () => {
-                startButton.setTexture('Load_2');
-            });
-
-            this.time.delayedCall(1500, () => {
-                startButton.setTexture('Load_3');
-            });
-
-            this.time.delayedCall(2500, () => {
+            if (userAddress) {
+                this.assignRoomAndStartGame(userAddress);
+            } else {
                 this.scene.start('HowToPlay');
-            });
+            }
         });
+    }
+
+    async checkMetaMaskLogin() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const userAddress = await signer.getAddress();
+                return userAddress;
+            } catch (error) {
+                console.error('MetaMask login failed:', error);
+            }
+        } else {
+            console.log('MetaMask not detected');
+        }
+        return null;
+    }
+
+    async assignRoomAndStartGame(userAddress) {
+        try {
+            const response = await fetch('http://localhost:3000/assign-room', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userAddress })
+            });
+
+            const data = await response.json();
+            console.log('Assigned Room:', data.roomId);
+
+            this.scene.start('ClickerGame', {
+                userAddress: userAddress,
+                roomId: data.roomId
+            });
+        } catch (error) {
+            console.error('Error assigning room:', error);
+        }
     }
 }
