@@ -100,6 +100,9 @@ async function getUserBlobzBalance() {
                 detail: { userAddress, tokenBalance: formattedBalance }
             }));
 
+            // บันทึกการเชื่อมต่อกระเป๋าใน localStorage
+            localStorage.setItem('walletConnected', 'true');
+
         } catch (error) {
             console.error('Error accessing MetaMask:', error);
         }

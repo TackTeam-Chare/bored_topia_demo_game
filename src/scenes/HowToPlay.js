@@ -1,15 +1,19 @@
-import {
-    Scene
-} from 'phaser';
-import {
-    getUserBlobzBalance
-} from '../lobzTokenChecker.js';
+import { Scene } from 'phaser';
+import { getUserBlobzBalance } from '../lobzTokenChecker.js';
 
 export class HowToPlay extends Scene {
     constructor() {
         super('HowToPlay');
         this.typingText = '';
-        this.fullText = 'Click on the falling coins \nto boost your score';
+        this.instructions = [
+            "1. Tap to win: Click on the falling coins to boost your score.",
+            "2. Dodge the skulls: Avoid the spooky skulls to keep your points safe.",
+            "3. Join the party: Compete against 10 other players in each room.",
+            "4. Become the Giver: If you're the 6th highest scorer at the end of the round, you'll share your score with others.",
+            "5. Unlock the bonus: Share your invite link to get a 50% bonus on your friend’s first round scores.",
+            "6. Climb the leaderboard: Aim for the top spot and compete against others!"
+        ];
+        this.currentInstructionIndex = 0;
         this.textIndex = 0;
         this.userAddress = '';
         this.tokenBalance = '';
@@ -44,43 +48,55 @@ export class HowToPlay extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        const tapToWinText = this.add.text(500, 350, 'TAP TO WIN:', {
-            fontFamily: 'AlteHaasGroteskBold',
-            fontSize: '40px',
-            color: '#8B4513',
-            align: 'center'
-        }).setOrigin(0.5);
-
-        const instructionsText = this.add.text(500, 420, '', {
+        const instructionsText = this.add.text(512, 400, '', {
             fontFamily: 'AlteHaasGroteskRegular',
-            fontSize: '32px',
+            fontSize: '36px',
             color: '#ffffff',
             align: 'center',
-            lineSpacing: 10
+            wordWrap: { width: 400, useAdvancedWrap: true }, 
+            lineSpacing: 15 
         }).setOrigin(0.5);
 
-        this.typeText(instructionsText);
+        this.typeText(instructionsText); // Start typing the first instruction
+
         this.createButtons();
 
         document.addEventListener('walletConnected', async (event) => {
-            const {
-                userAddress,
-                tokenBalance
-            } = event.detail;
+            const { userAddress, tokenBalance } = event.detail;
 
             this.userAddress = userAddress;
             this.tokenBalance = tokenBalance;
-            this.isTrialMode = false; // Set trial mode to false on login
+            this.isTrialMode = false;
 
             console.log(`Wallet connected: ${userAddress}, Balance: ${tokenBalance}`);
-
-            // **บันทึกข้อมูลลงใน registry ของ Phaser**
             this.registry.set('userAddress', userAddress);
             this.registry.set('tokenBalance', tokenBalance);
 
-            await this.assignRoom(); // Assign room after login
-            this.startGame(); // Automatically start the game
+            await this.assignRoom();
+            this.startGame();
         });
+    }
+
+    typeText(instructionsText) {
+        const currentInstruction = this.instructions[this.currentInstructionIndex];
+
+        if (this.textIndex < currentInstruction.length) {
+            this.typingText += currentInstruction[this.textIndex];
+            instructionsText.setText(this.typingText);
+            this.textIndex++;
+            this.time.delayedCall(50, () => this.typeText(instructionsText));
+        } else {
+            this.time.delayedCall(1000, () => this.nextInstruction(instructionsText));
+        }
+    }
+
+    nextInstruction(instructionsText) {
+        this.currentInstructionIndex++;
+        if (this.currentInstructionIndex < this.instructions.length) {
+            this.typingText = '';
+            this.textIndex = 0;
+            this.typeText(instructionsText);
+        }
     }
 
     createButtons() {
@@ -89,7 +105,7 @@ export class HowToPlay extends Scene {
             if (!this.isTrialMode && !this.roomId) {
                 console.error('Room not assigned yet.');
             } else {
-                this.startGame(); // Start the game either way
+                this.startGame();
             }
         });
         this.addHoverEffect(playButton);
@@ -97,14 +113,14 @@ export class HowToPlay extends Scene {
         const skipButton = this.add.image(650, 620, 'buttonSkip').setInteractive().setScale(0.6);
         skipButton.on('pointerdown', () => {
             console.log('Starting trial mode without login...');
-            this.isTrialMode = true; // Ensure the game runs in trial mode
-            this.startGame(); // Start game immediately in trial mode
+            this.isTrialMode = true;
+            this.startGame();
         });
         this.addHoverEffect(skipButton);
 
         const connectWalletButton = this.add.image(this.cameras.main.width / 2, 780, 'connectWallet').setInteractive().setScale(0.15);
         connectWalletButton.on('pointerdown', () => {
-            getUserBlobzBalance(); // Trigger wallet connection
+            getUserBlobzBalance();
         });
         this.addHoverEffect(connectWalletButton);
     }
@@ -113,18 +129,14 @@ export class HowToPlay extends Scene {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}assign-room`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({
-                    userAddress: this.userAddress
-                })
+                body: JSON.stringify({ userAddress: this.userAddress })
             });
 
             const data = await response.json();
             if (response.ok) {
-                this.roomId = data.roomId; // ตรวจสอบว่า roomId ได้รับค่า
+                this.roomId = data.roomId;
                 console.log(`Assigned to Room ID: ${this.roomId}`);
             } else {
                 console.error('Failed to assign room:', data);
@@ -133,7 +145,6 @@ export class HowToPlay extends Scene {
             console.error('Error assigning room:', error);
         }
     }
-
 
     startGame() {
         console.log(`Starting game with Room ID: ${this.roomId}`);
@@ -148,15 +159,5 @@ export class HowToPlay extends Scene {
     addHoverEffect(button) {
         button.on('pointerover', () => button.setScale(button.scaleX * 1.1));
         button.on('pointerout', () => button.setScale(button.scaleX / 1.1));
-    }
-
-    typeText(instructionsText) {
-        if (this.textIndex < this.fullText.length) {
-            this.typingText += this.fullText[this.textIndex];
-            instructionsText.setText(this.typingText);
-            this.textIndex++;
-
-            this.time.delayedCall(50, () => this.typeText(instructionsText));
-        }
     }
 }

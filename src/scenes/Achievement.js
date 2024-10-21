@@ -56,7 +56,7 @@ export class Achievement extends Phaser.Scene {
             strokeThickness: 6
         }).setOrigin(0.5);
 
-        this.add.text(535, 650, ` ${highScore}`, {
+        this.add.text(535, 640, ` ${highScore}`, {
             fontFamily: 'Arial Black',
             fontSize: '30px',
             color: '#FFD700',
