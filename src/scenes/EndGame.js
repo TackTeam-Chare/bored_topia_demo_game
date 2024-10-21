@@ -1,4 +1,4 @@
-export class GameOver extends Phaser.Scene { 
+export class GameOver extends Phaser.Scene {  
     constructor() {
         super('GameOver');
     }
@@ -7,11 +7,8 @@ export class GameOver extends Phaser.Scene {
         // Load assets
         this.load.image('LevelCompletePage', 'assets/ui/background/Level_complete_page.png');
         this.load.image('Level_complete', 'assets/ui/background/Level_complete.png');
-        this.load.image('InviteFriends', 'assets/ui/background/Invite_friends.png');
-        this.load.image('ShareOnX', 'assets/ui/background/Share_on_X.png');
-        this.load.image('button_exit', 'assets/ui/background/button_exit.svg');
         this.load.image('button_leaderboard', 'assets/ui/background/button_leaderboard.svg');
-        this.load.image('button_play', 'assets/ui/background/button_play.svg');
+        this.load.image('button_play', 'assets/ui/background/button_play2.svg');
     }
 
     create(data) {
@@ -19,9 +16,11 @@ export class GameOver extends Phaser.Scene {
         const roomId = data.roomId || 'N/A';
         console.log(`Game over screen for Room ID: ${roomId}, Score: ${score}`);
         this.registry.set('highscore', score);
-        // Set up the background and house image
+
+        // Set up the background and animated house image
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
         const animatedHouse = this.add.image(512, 300, 'LevelCompletePage').setScale(0.15).setOrigin(0.5);
+
         this.tweens.add({
             targets: animatedHouse,
             y: '+=30',
@@ -44,6 +43,7 @@ export class GameOver extends Phaser.Scene {
         }
 
         const stars = this.add.image(512, 980, `Level_complete`).setOrigin(0.5);
+
         this.tweens.add({
             targets: stars,
             scale: { from: 0.05, to: 0.2 },
@@ -53,8 +53,18 @@ export class GameOver extends Phaser.Scene {
         });
 
         // Display score text
-        const scoreBoxTextStyle = { fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
-        const scoreText = this.add.text(630, 1045, `${score}`, scoreBoxTextStyle).setAlign('center').setOrigin(0.5);
+        const scoreBoxTextStyle = { 
+            fontFamily: 'Arial Black', 
+            fontSize: 38, 
+            color: '#ffffff', 
+            stroke: '#000000', 
+            strokeThickness: 4 
+        };
+
+        const scoreText = this.add.text(630, 1045, `${score}`, scoreBoxTextStyle)
+            .setAlign('center')
+            .setOrigin(0.5);
+
         this.tweens.add({
             targets: scoreText,
             scale: { from: 0.9, to: 1.1 },
@@ -63,57 +73,22 @@ export class GameOver extends Phaser.Scene {
             repeat: -1
         });
 
-        // Adding the main buttons (Exit, Leaderboard, Play)
-        const playButton = this.add.image(500, 1220, 'button_play').setScale(0.7).setInteractive();
-        const leaderboardButton = this.add.image(330, 1220, 'button_leaderboard').setScale(0.7).setInteractive();
-        const exitButton = this.add.image(680, 1220, 'button_exit').setScale(0.7).setInteractive();
-
-        // Adding Invite Friends and Share buttons with adjusted size
-        const inviteFriendsButton = this.add.image(512, 1400, 'InviteFriends').setScale(0.175).setInteractive();
-        const shareOnXButton = this.add.image(512, 1550, 'ShareOnX').setScale(0.175).setInteractive();
+        // Add the play button
+        const playButton = this.add.image(500, 1220, 'button_play').setScale(1).setInteractive();
 
         playButton.on('pointerdown', () => {
-            console.log('Play Clicked');
-            this.scene.start('ClickerGame');
-        });
-        
-        leaderboardButton.on('pointerdown', () => {
-            console.log('Opening Leaderboard...');
-            this.scene.start('Leaderboard', { roomId });
+            console.log('Leaderboard');
+            this.scene.start('Leaderboard');
         });
 
-        exitButton.on('pointerdown', () => {
-            console.log('Exit Clicked');
-            this.scene.start('MainMenu');
-        });
-        
-
-        inviteFriendsButton.on('pointerdown', () => {
-            console.log('Invite Friends Clicked');
-            // Add functionality here
-        });
-
-        shareOnXButton.on('pointerdown', () => {
-            console.log('Share on X Clicked');
-            // Add functionality here
-        });
-
-        // Adding hover effects to buttons
+        // Add hover effect to the play button
         this.addHoverEffect(playButton);
-        this.addHoverEffect(leaderboardButton);
-        this.addHoverEffect(exitButton);
-        this.addHoverEffect(inviteFriendsButton);
-        this.addHoverEffect(shareOnXButton);
 
-        // Typing effect for the invite message
-        const bonusText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
-        this.addTypingEffect(512, 1700, bonusText, { 
-            fontSize: '30px', 
-            fontFamily: 'Arial', 
-            color: '#ffffff',
-            lineSpacing: 5
+        // **Auto-redirect to the Leaderboard after 3 seconds**
+        this.time.delayedCall(3000, () => {
+            console.log('Auto-redirecting to Leaderboard...');
+            this.scene.start('Leaderboard', { roomId }); // Pass roomId to Leaderboard scene
         });
-
     }
 
     addHoverEffect(button) {
@@ -121,7 +96,7 @@ export class GameOver extends Phaser.Scene {
         button.on('pointerout', () => button.setScale(button.scaleX / 1.1));
     }
 
-    // Function to create the typing effect for the text
+    // Optional: Function to create the typing effect for the text
     addTypingEffect(x, y, text, style) {
         const textObject = this.add.text(x, y, '', style).setOrigin(0.5);
         let index = 0;

@@ -44,7 +44,6 @@ export class HallOfFame extends Phaser.Scene {
         this.load.image('Hall_of_fame', 'assets/ui/background/Hall_of_fame.png');
         this.load.image('InviteFriends', 'assets/ui/background/Invite_friends.png');
         this.load.image('ShareOnX', 'assets/ui/background/Share_on_X.png');
-        this.load.image('button_exit', 'assets/ui/background/button_exit.svg');
         this.load.image('button_play2', 'assets/ui/background/button_play2.svg');
         this.load.image('scrollArrow', 'assets/ui/background/button_scroll_arrow.svg');
         this.load.image('scrollBar', 'assets/ui/background/button_scroll_bar.svg');
@@ -96,26 +95,20 @@ export class HallOfFame extends Phaser.Scene {
         });
 
         // Play and Exit buttons
-        const playButton = this.add.image(400, 1240, 'button_play2').setScale(0.8).setInteractive();
-        const exitButton = this.add.image(600, 1240, 'button_exit').setScale(0.8).setInteractive();
+        const playButton = this.add.image(512, 1300, 'button_play2').setScale(0.9).setInteractive();
 
         const shareOnXButton = this.add.image(512, 1450, 'ShareOnX').setScale(0.17).setInteractive();
         const inviteFriendsButton = this.add.image(512, 1600, 'InviteFriends').setScale(0.17).setInteractive();
 
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
-            this.scene.start('ClickerGame');
+            this.scene.start('Achievement');
         });
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
         });
 
-        exitButton.on('pointerdown', () => {
-            this.scene.start('Achievement');
-          });
-
         this.addHoverEffect(playButton, 'Play Button Hovered');
-        this.addHoverEffect(exitButton, 'Exit Button Hovered');
         this.addHoverEffect(shareOnXButton, 'ShareOnX Button Hovered');
         this.addHoverEffect(inviteFriendsButton);
         

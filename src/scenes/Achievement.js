@@ -7,9 +7,10 @@ export class Achievement extends Phaser.Scene {
         this.load.image('BG', 'assets/ui/background/BG.png');
         this.load.image('Achievement', 'assets/ui/background/Achievement.png');
         this.load.image('InviteFriends', 'assets/ui/background/Invite_friends.png');
-        this.load.image('button_exit', 'assets/ui/background/button_exit.svg');
+        this.load.image('ShareOnX', 'assets/ui/background/Share_on_X.png');
+        this.load.image('button_play2', 'assets/ui/background/button_play2.svg');
         this.load.image('button_leaderboard', 'assets/ui/background/button_leaderboard.svg');
-        this.load.image('button_setting', 'assets/ui/background/button_setting.svg');
+
     }
 
     create() {
@@ -27,20 +28,20 @@ export class Achievement extends Phaser.Scene {
         });
 
         // ปุ่มต่าง ๆ (Settings, Exit, Leaderboard)
-        const playButton = this.add.image(510, 890, 'button_setting').setScale(0.7).setInteractive();
-        const exitButton = this.add.image(630, 890, 'button_exit').setScale(0.7).setInteractive();
-        const leaderboardButton = this.add.image(380, 890, 'button_leaderboard').setScale(0.7).setInteractive();
-        const inviteFriendsButton = this.add.image(512, 1200, 'InviteFriends').setScale(0.17).setInteractive();
+        const leaderboardButton = this.add.image(450, 910, 'button_leaderboard').setScale(0.8).setInteractive();
+        const playButton = this.add.image(580, 910, 'button_play2').setScale(0.8).setInteractive();
+        const shareOnXButton = this.add.image(512, 1100, 'ShareOnX').setScale(0.18).setInteractive();
+        const inviteFriendsButton = this.add.image(512, 1250, 'InviteFriends').setScale(0.18).setInteractive();
+  
 
         // การจัดการเหตุการณ์คลิกปุ่ม
         playButton.on('pointerdown', () => console.log('Settings Clicked'));
-        exitButton.on('pointerdown', () => console.log('Exit Clicked'));
         inviteFriendsButton.on('pointerdown', () => console.log('Invite Friends Clicked'));
 
         this.addHoverEffect(playButton);
-        this.addHoverEffect(exitButton);
         this.addHoverEffect(leaderboardButton);
         this.addHoverEffect(inviteFriendsButton);
+        this.addHoverEffect(shareOnXButton, 'ShareOnX Button Hovered');
 
         // **แสดงข้อความหลังจากเพิ่ม UI อื่น ๆ** เพื่อให้แน่ใจว่าข้อความอยู่ด้านบนสุด
         const userAddress = this.registry.get('userAddress') || 'Not Connected';

@@ -28,36 +28,33 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        let startButtonScale = Math.min(this.scale.width / 800, this.scale.height / 600) * 1.2;
+        let startButtonScale = Math.min(this.scale.width / 800, this.scale.height / 600) * 1.5;
+
         const marginBottom = this.scale.height * 0.1;
 
-        const startButton = this.add.image(
-            this.scale.width / 2, 
-            this.scale.height - marginBottom, 
-            'Start'
-        ).setInteractive().setScale(startButtonScale);
+        const startButton = this.add.image(this.scale.width / 2, this.scale.height - marginBottom, 'Start')
+            .setInteractive()
+            .setScale(startButtonScale);
 
-        startButton.setPosition(
-            this.scale.width / 2, 
-            this.scale.height - startButton.displayHeight / 2 - marginBottom
-        );
+        startButton.setPosition(this.scale.width / 2, this.scale.height - startButton.displayHeight / 2 - marginBottom);
 
         const pulsingTween = this.tweens.add({
             targets: startButton,
-            scaleX: startButtonScale * 0.9,
-            scaleY: startButtonScale * 0.9,
+            scaleX: startButtonScale * 0.95,
+            scaleY: startButtonScale * 0.95,
             duration: 1000,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
 
+
         startButton.on('pointerover', () => {
             pulsingTween.pause();
             this.tweens.add({
                 targets: startButton,
-                scaleX: startButtonScale * 1.1,
-                scaleY: startButtonScale * 1.1,
+                scaleX: startButtonScale * 1.05,
+                scaleY: startButtonScale * 1.05,
                 duration: 200,
                 ease: 'Sine.easeInOut'
             });
@@ -66,8 +63,8 @@ export class MainMenu extends Scene {
         startButton.on('pointerout', () => {
             this.tweens.add({
                 targets: startButton,
-                scaleX: startButtonScale * 0.9,
-                scaleY: startButtonScale * 0.9,
+                scaleX: startButtonScale * 0.95,
+                scaleY: startButtonScale * 0.95,
                 duration: 200,
                 ease: 'Sine.easeInOut',
                 onComplete: () => {
@@ -78,32 +75,20 @@ export class MainMenu extends Scene {
 
         startButton.on('pointerdown', () => {
             this.time.delayedCall(500, () => {
-                startButton.setTexture('Load_1').setScale(1.5);
+                startButton.setTexture('Load_1');
             });
 
             this.time.delayedCall(1000, () => {
-                startButton.setTexture('Load_2').setScale(1.5);
+                startButton.setTexture('Load_2');
             });
 
             this.time.delayedCall(1500, () => {
-                startButton.setTexture('Load_3').setScale(1.5);
+                startButton.setTexture('Load_3');
             });
 
             this.time.delayedCall(2500, () => {
-                this.navigateToNextScene(); // ตรวจสอบและเปลี่ยนหน้า
+                this.scene.start('HowToPlay');
             });
         });
-    }
-
-    navigateToNextScene() {
-        const walletConnected = localStorage.getItem('walletConnected');
-
-        if (walletConnected === 'true') {
-            console.log('Redirecting to Play...');
-            this.scene.start('ClickerGame'); // ไปหน้า Play ถ้าเคยเชื่อมต่อ
-        } else {
-            console.log('First time. Redirecting to HowToPlay...');
-            this.scene.start('HowToPlay'); // ไปหน้า HowToPlay ถ้าเปิดครั้งแรก
-        }
     }
 }

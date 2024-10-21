@@ -151,8 +151,8 @@ export class Leaderboard extends Phaser.Scene {
 
         // Button click interactions
         playButton.on('pointerdown', () => {
-            console.log('Play Clicked');
-            this.scene.start('ClickerGame'); // Go to HallOfFame scene
+            console.log('HallOfFame');
+            this.scene.start('HallOfFame'); // Go to HallOfFame scene
         });
 
         exitButton.on('pointerdown', () => {
