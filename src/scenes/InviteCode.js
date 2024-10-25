@@ -59,9 +59,9 @@ export class InviteCodeScreen extends Phaser.Scene {
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = 'Enter Invite Code';
-        input.maxLength = 6; // จำกัดจำนวนตัวอักษรสูงสุด 6 ตัว
+        input.maxLength = 6;
     
-        const offsetX = 60; // ปรับตำแหน่งให้อยู่ข้างขวา
+        const offsetX = 60;
         input.style.position = 'absolute';
         input.style.top = `${window.innerHeight / 2 - 20}px`;
         input.style.left = `${window.innerWidth / 2 - 130 + offsetX}px`;
@@ -75,24 +75,46 @@ export class InviteCodeScreen extends Phaser.Scene {
         input.style.color = '#FFFFFF';
         input.style.outline = 'none';
     
-        // ส่งโค้ดไป backend เมื่อกด Enter และโค้ดมีความยาวครบ 6 ตัว
+        // ดึงที่อยู่จาก MetaMask เพื่อส่งไปกับโค้ดเชิญ
+        const getUserAddress = async () => {
+            if (window.ethereum) {
+                try {
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    const signer = provider.getSigner();
+                    return await signer.getAddress();
+                } catch (error) {
+                    console.error('MetaMask login failed:', error);
+                    return null;
+                }
+            }
+            return null;
+        };
+    
         input.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter' && input.value.length === 6) {
                 const code = input.value;
-                console.log(`Submitting code: ${code}`); // ตรวจสอบโค้ดที่ถูกส่งไป
-        
+                console.log(`Submitting code: ${code}`);
+    
                 try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}submit-invite`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ code }), // ตรวจสอบว่าโครงสร้างนี้ถูกต้อง
-                    });
-        
+                    const inviterAddress = await getUserAddress(); // ดึงที่อยู่จาก MetaMask
+    
+                    if (!inviterAddress) {
+                        alert('Please connect to MetaMask to submit invite.');
+                        return;
+                    }
+    
+                    const response = await fetch(
+                        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}submit-invite`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code, inviterAddress }),  // ส่งที่อยู่ผู้เชิญไป backend
+                        }
+                    );
+    
                     const result = await response.json();
-                    console.log('Response from server:', result); // ดู response ที่ได้รับจาก backend
-        
+                    console.log('Response from server:', result);
+    
                     if (response.ok) {
                         alert('Invite code submitted successfully!');
                         input.value = ''; // ล้างช่อง input
@@ -106,13 +128,13 @@ export class InviteCodeScreen extends Phaser.Scene {
                 }
             }
         });
-        
     
         document.body.appendChild(input);
     
         // ลบ input field เมื่อออกจาก scene เพื่อป้องกัน memory leak
         this.events.on('shutdown', () => input.remove());
     }
+    
     
 
     addTypingEffect(x, y, text, style) {
