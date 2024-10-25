@@ -17,9 +17,10 @@ export class ClickerGame extends Scene {
     init(data) {
         this.userAddress = data.userAddress || '';
         this.tokenBalance = data.tokenBalance || 0;
-        this.roomId = data.roomId || 'N/A'; // ตรวจสอบว่าค่าไม่ใช่ 'N/A'
+        this.roomId = data.roomId || 'default-room-id'; // Default to a non-N/A ID
         console.log(`Game started with Room ID: ${this.roomId}`);
     }
+    
 
     preload() {
         this.load.audio('coin_Bonze', 'assets/sounds/coin_Bonze.mp3');
@@ -365,8 +366,9 @@ export class ClickerGame extends Scene {
         this.time.delayedCall(2000, () => {
             this.scene.start('GameOver', {
                 score: this.score,
-                roomId: this.roomId // Send room ID to GameOver scene
+                roomId: this.roomId // Ensure roomId is passed
             });
+            
         });
     }
 

@@ -28,8 +28,8 @@ export class Achievement extends Phaser.Scene {
         });
 
         // ปุ่มต่าง ๆ (Settings, Exit, Leaderboard)
-        const leaderboardButton = this.add.image(450, 910, 'button_leaderboard').setScale(0.8).setInteractive();
-        const playButton = this.add.image(580, 910, 'button_play2').setScale(0.8).setInteractive();
+        const leaderboardButton = this.add.image(440, 920, 'button_leaderboard').setScale(0.9).setInteractive();
+        const playButton = this.add.image(590, 920, 'button_play2').setScale(0.9).setInteractive();
         const shareOnXButton = this.add.image(512, 1100, 'ShareOnX').setScale(0.18).setInteractive();
         const inviteFriendsButton = this.add.image(512, 1250, 'InviteFriends').setScale(0.18).setInteractive();
   

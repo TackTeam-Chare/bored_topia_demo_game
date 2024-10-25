@@ -30,17 +30,7 @@ export class GameOver extends Phaser.Scene {
             repeat: -1
         });
 
-        // Display stars based on the player's score
-        let starLevel;
-        if (score >= 100) {
-            starLevel = 3;
-        } else if (score >= 50) {
-            starLevel = 2;
-        } else if (score >= 20) {
-            starLevel = 1;
-        } else {
-            starLevel = 0;
-        }
+       
 
         const stars = this.add.image(512, 980, `Level_complete`).setOrigin(0.5);
 
@@ -78,7 +68,9 @@ export class GameOver extends Phaser.Scene {
 
         playButton.on('pointerdown', () => {
             console.log('Leaderboard');
-            this.scene.start('Leaderboard');
+            // this.scene.start('Leaderboard', { roomId });
+            this.scene.start('Leaderboard', { roomId: data.roomId || 'default-room-id' });
+
         });
 
         // Add hover effect to the play button
@@ -87,7 +79,9 @@ export class GameOver extends Phaser.Scene {
         // **Auto-redirect to the Leaderboard after 3 seconds**
         this.time.delayedCall(3000, () => {
             console.log('Auto-redirecting to Leaderboard...');
-            this.scene.start('Leaderboard', { roomId }); // Pass roomId to Leaderboard scene
+            // this.scene.start('Leaderboard', { roomId });
+            this.scene.start('Leaderboard', { roomId: data.roomId || 'default-room-id' });
+
         });
     }
 

@@ -143,8 +143,9 @@ export class Leaderboard extends Phaser.Scene {
         };
         this.add.text(570, 210, ` ${this.roomId}`, roomTextStyle).setOrigin(0.5);
 
-        const playButton = this.add.image(400, 1240, 'button_play2').setScale(0.8).setInteractive();
-        const exitButton = this.add.image(600, 1240, 'button_exit').setScale(0.8).setInteractive();
+        const buttonLeaderboard = this.add.image(420, 1300, 'button_leaderboard').setScale(0.9).setInteractive();
+        const playButton = this.add.image(580, 1300, 'button_play2').setScale(0.9).setInteractive();
+      
 
         const shareOnXButton = this.add.image(512, 1450, 'ShareOnX').setScale(0.17).setInteractive();
         const inviteFriendsButton = this.add.image(512, 1600, 'InviteFriends').setScale(0.17).setInteractive();
@@ -152,10 +153,10 @@ export class Leaderboard extends Phaser.Scene {
         // Button click interactions
         playButton.on('pointerdown', () => {
             console.log('HallOfFame');
-            this.scene.start('HallOfFame'); // Go to HallOfFame scene
+            this.scene.start('HallOfFame', { roomId: this.roomId });
         });
 
-        exitButton.on('pointerdown', () => {
+        buttonLeaderboard.on('pointerdown', () => {
             console.log(`Exit Clicked. Sending roomId: ${this.roomId} to HallOfFame`);
             this.scene.start('HallOfFame', { roomId: this.roomId }); // ส่ง roomId ไปยัง HallOfFame
         });
@@ -172,7 +173,7 @@ export class Leaderboard extends Phaser.Scene {
         });
 
         this.addHoverEffect(playButton);
-        this.addHoverEffect(exitButton);
+        this.addHoverEffect(buttonLeaderboard);
         this.addHoverEffect(inviteFriendsButton);
         this.addHoverEffect(shareOnXButton);
 

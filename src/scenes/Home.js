@@ -6,6 +6,7 @@ export class MainMenu extends Scene {
     }
 
     preload() {
+        // Load assets
         this.load.image('logo', 'assets/ui/logo.png');
         this.load.image('Start', 'assets/ui/background/Start.svg');
         this.load.image('Load_1', 'assets/ui/background/Load_1.svg');
@@ -15,9 +16,11 @@ export class MainMenu extends Scene {
     }
 
     create() {
+        // Set up background
         const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
         bg.setDisplaySize(this.scale.width, this.scale.height);
 
+        // Add logo with animation
         const logo = this.add.image(this.scale.width / 2, 350, 'logo').setScale(0.3);
         this.tweens.add({
             targets: logo,
@@ -28,18 +31,55 @@ export class MainMenu extends Scene {
             ease: 'Sine.easeInOut'
         });
 
+        // Add Start button with interactivity
         const startButton = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Start')
             .setInteractive()
             .setScale(1.5);
 
-        startButton.on('pointerdown', async () => {
-            const userAddress = await this.checkMetaMaskLogin();
+        // Handle button hover effects
+        startButton.on('pointerover', () => startButton.setScale(1.6));
+        startButton.on('pointerout', () => startButton.setScale(1.5));
 
+        // Handle button click to start loading animation
+        startButton.on('pointerdown', async () => {
+            startButton.destroy();  // Hide button after click
+            await this.showLoadingAnimation();  // Run loading sequence
+
+            const userAddress = await this.checkMetaMaskLogin();
             if (userAddress) {
-                this.assignRoomAndStartGame(userAddress);
+                await this.assignRoomAndStartGame(userAddress);
             } else {
-                this.scene.start('HowToPlay');
+                this.scene.start('HowToPlay');  // Redirect if MetaMask login fails
             }
+        });
+
+        // Adjust UI on window resize
+        this.scale.on('resize', this.resize, this);
+    }
+
+    resize() {
+        // Ensure elements adjust on resize
+        const startButton = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Start');
+        startButton.setScale(1.5);
+    }
+
+    async showLoadingAnimation() {
+        // Initialize loading at the Start button's position
+        const loadImage = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Load_1').setScale(1.8);
+
+        // Loop through Load_1, Load_2, and Load_3
+        for (let i = 1; i <= 3; i++) {
+            loadImage.setTexture(`Load_${i}`);  // Update texture
+            await this.wait(1000);  // Wait 1 second for each image
+        }
+
+        loadImage.destroy();  // Remove loading image after sequence completes
+    }
+
+    // Helper function to create a delay
+    wait(ms) {
+        return new Promise(resolve => {
+            this.time.addEvent({ delay: ms, callback: resolve });
         });
     }
 
@@ -61,8 +101,9 @@ export class MainMenu extends Scene {
     }
 
     async assignRoomAndStartGame(userAddress) {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         try {
-            const response = await fetch('http://localhost:3000/assign-room', {
+            const response = await fetch(`${apiUrl}assign-room`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -73,6 +114,7 @@ export class MainMenu extends Scene {
             const data = await response.json();
             console.log('Assigned Room:', data.roomId);
 
+            // Start the ClickerGame scene with user details
             this.scene.start('ClickerGame', {
                 userAddress: userAddress,
                 roomId: data.roomId
