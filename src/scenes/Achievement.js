@@ -3,6 +3,12 @@ export class Achievement extends Phaser.Scene {
         super('Achievement');
     }
 
+     // Use init to receive roomId
+     init(data) {
+        this.roomId = data.roomId || 'default-room-id'; // Store roomId with a default fallback
+        console.log(`Achievement Scene started with Room ID: ${this.roomId}`);
+    }
+
     preload() {
         this.load.image('BG', 'assets/ui/background/BG.png');
         this.load.image('Achievement', 'assets/ui/background/Achievement.png');
@@ -27,17 +33,33 @@ export class Achievement extends Phaser.Scene {
         });
 
         // Add buttons
-        const leaderboardButton = this.add.image(440, 920, 'button_leaderboard').setScale(0.9).setInteractive();
+        const leaderBoardButton = this.add.image(440, 920, 'button_leaderboard').setScale(0.9).setInteractive();
         const playButton = this.add.image(590, 920, 'button_play2').setScale(0.9).setInteractive();
         const shareOnXButton = this.add.image(512, 1100, 'ShareOnX').setScale(0.18).setInteractive();
         const inviteFriendsButton = this.add.image(512, 1250, 'InviteFriends').setScale(0.18).setInteractive();
 
-        // Button interactions
-        playButton.on('pointerdown', () => console.log('Play Clicked'));
-        inviteFriendsButton.on('pointerdown', () => console.log('Invite Friends Clicked'));
+       playButton.on('pointerdown', () => {
+            console.log('Play Clicked');
+            this.scene.start('ClickerGame');
+        });
+
+        inviteFriendsButton.on('pointerdown', () => {
+            console.log('Invite Friends Clicked');
+            this.scene.start('InviteCodeScreen');
+        });
+
+        leaderBoardButton.on('pointerdown', () => {
+            console.log('Leaderboard Clicked');
+            this.scene.start('Leaderboard', { roomId: this.roomId });
+        });
+
+        shareOnXButton.on('pointerdown', () => {
+            this.shareOnX();
+        });
+        
 
         this.addHoverEffect(playButton);
-        this.addHoverEffect(leaderboardButton);
+        this.addHoverEffect(leaderBoardButton);
         this.addHoverEffect(inviteFriendsButton);
         this.addHoverEffect(shareOnXButton);
 
@@ -59,12 +81,35 @@ export class Achievement extends Phaser.Scene {
             lineSpacing: 5,
         });
 
-        // Return to main menu on click
-        this.input.once('pointerdown', () => {
-            this.registry.set('highscore', 0);
-            this.scene.start('MainMenu');
-        });
+        // // Return to main menu on click
+        // this.input.once('pointerdown', () => {
+        //     this.registry.set('highscore', 0);
+        //     this.scene.start('MainMenu');
+        // });
     }
+
+    async shareOnX() {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const userAddress = await this.getUserAddress();
+            const response = await fetch(`${apiUrl}player-stats/${userAddress}`);
+
+            if (!response.ok) throw new Error('Failed to fetch player data.');
+
+            const { score, gamesPlayed } = await response.json();
+
+            // Create a message for sharing
+            const text = `I just scored ${score} points in BoredTopia! 🎮\nI've played ${gamesPlayed} games so far! 🚀\nJoin me and compete for rewards!\n#BoredTopia`;
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+
+            // Open Twitter share window
+            const newWindow = window.open(tweetUrl, '_blank');
+            if (newWindow) newWindow.focus();
+        } catch (error) {
+            console.error('Error sharing on X:', error);
+        }
+    }
+
 
     async displayInviteCount(userAddress) {
         try {

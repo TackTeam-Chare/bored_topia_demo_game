@@ -152,8 +152,9 @@ export class Leaderboard extends Phaser.Scene {
 
         // Button click interactions
         playButton.on('pointerdown', () => {
-            console.log('HallOfFame');
-            this.scene.start('HallOfFame', { roomId: this.roomId });
+            console.log('ClickerGame');
+            // this.scene.start('HallOfFame', { roomId: this.roomId });
+             this.scene.start('ClickerGame');
         });
 
         buttonLeaderboard.on('pointerdown', () => {
@@ -161,17 +162,17 @@ export class Leaderboard extends Phaser.Scene {
             this.scene.start('HallOfFame', { roomId: this.roomId }); // ส่ง roomId ไปยัง HallOfFame
         });
         
-        
+          // Share button interaction
+          shareOnXButton.on('pointerdown', () => {
+            this.shareLeaderboardOnX();
+        });
 
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
             this.scene.start('InviteCodeScreen');
         });
 
-        // Share on X Button Action
-        shareOnXButton.on('pointerdown', () => {
-            this.shareOnX();
-        });
+
 
         this.addHoverEffect(playButton);
         this.addHoverEffect(buttonLeaderboard);
@@ -198,12 +199,31 @@ export class Leaderboard extends Phaser.Scene {
         });
     }
 
-    shareOnX() {
-        // Example message to be shared
-        const message = encodeURIComponent('Check out the top scores in the game!');
-        const url = `https://x.com/intent/tweet?text=${message}`;
-        window.open(url, '_blank');
+   async shareLeaderboardOnX() {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${apiUrl}leaderboard/${this.roomId}`);
+
+            if (!response.ok) throw new Error('Failed to fetch leaderboard data.');
+
+            const leaderboardData = await response.json();
+            const topPlayer = leaderboardData[0];
+
+            // Create share message
+            const shareText = topPlayer
+                ? `Top player in Room ${this.roomId}: ${topPlayer.userAddress.slice(0, 4)}...${topPlayer.userAddress.slice(-4)} with ${topPlayer.score} points! 🎮\nJoin the competition!\n#BoredTopia`
+                : `Join Room ${this.roomId} and be the first to top the leaderboard! 🚀\n#BoredTopia`;
+
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+
+            // Open Twitter share window
+            const newWindow = window.open(tweetUrl, '_blank');
+            if (newWindow) newWindow.focus();
+        } catch (error) {
+            console.error('Error sharing leaderboard on X:', error);
+        }
     }
+
     
     addHoverEffect(button) {
         button.on('pointerover', () => button.setScale(button.scaleX * 1.1));

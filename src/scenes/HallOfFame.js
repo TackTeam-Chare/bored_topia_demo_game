@@ -102,12 +102,15 @@ export class HallOfFame extends Phaser.Scene {
 
         playButton.on('pointerdown', () => {
             console.log('Play Clicked');
-            this.scene.start('Achievement');
+            this.scene.start('ClickerGame');
         });
+
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
             this.scene.start('InviteCodeScreen');
         });
+
+        shareOnXButton.on('pointerdown', () => this.shareOnX());
 
         this.addHoverEffect(playButton, 'Play Button Hovered');
         this.addHoverEffect(shareOnXButton, 'ShareOnX Button Hovered');
@@ -124,6 +127,37 @@ export class HallOfFame extends Phaser.Scene {
 
         // Fetch and display Hall of Fame data
         this.fetchHallOfFameData();
+    }
+
+    async shareOnX() {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const userAddress = await this.getUserAddress();
+            const response = await fetch(`${apiUrl}player-stats/${userAddress}`);
+
+            if (!response.ok) throw new Error('Failed to fetch player data.');
+
+            const { score, gamesPlayed } = await response.json();
+            const text = `I just scored ${score} points in BoredTopia! 🎮\nI've played ${gamesPlayed} games! 🚀\nJoin me on BoredTopia and compete for rewards!\n#BoredTopia`;
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+
+            const newWindow = window.open(tweetUrl, '_blank');
+            if (newWindow) newWindow.focus();
+        } catch (error) {
+            console.error('Error sharing on X:', error);
+        }
+    }
+
+
+    async getUserAddress() {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            return await signer.getAddress();
+        } catch (error) {
+            console.error('MetaMask login failed:', error);
+            return null;
+        }
     }
 
     // Scroll up functionality
@@ -153,7 +187,6 @@ export class HallOfFame extends Phaser.Scene {
         this.currentRankImage.setTexture(rankImageKey).setVisible(true);
         console.log(`Updated Rank Image: ${rankImageKey}`);
     }
-
 
 
     // Display players for the current page

@@ -116,9 +116,10 @@ export class ClickerGame extends Scene {
         });
         
         monster.on('pointerdown', () => {
-            console.log('Navigating to Achievement Scene');
-            this.scene.start('Achievement'); 
+            console.log('Navigating to Achievement Scene with Room ID:', this.roomId);
+            this.scene.start('Achievement', { roomId: this.roomId });
         });
+        
 
         // Leaderboard Button Action
         leaderboardButton.on('pointerdown', () => {

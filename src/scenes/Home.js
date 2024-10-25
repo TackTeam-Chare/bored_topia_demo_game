@@ -70,7 +70,7 @@ export class MainMenu extends Scene {
         // Loop through Load_1, Load_2, and Load_3
         for (let i = 1; i <= 3; i++) {
             loadImage.setTexture(`Load_${i}`);  // Update texture
-            await this.wait(1000);  // Wait 1 second for each image
+            await this.wait(400);  // Wait 1 second for each image
         }
 
         loadImage.destroy();  // Remove loading image after sequence completes
