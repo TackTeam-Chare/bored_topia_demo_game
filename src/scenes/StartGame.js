@@ -136,7 +136,7 @@ export class ClickerGame extends Scene {
     
         // Timer initialization (ensure it's set correctly)
         this.timer = this.time.addEvent({
-            delay: 5000,
+            delay: 60000,
             callback: () => this.gameOver() // End the game after 15 seconds
         });
     
