@@ -10,14 +10,13 @@ export class Achievement extends Phaser.Scene {
         this.load.image('ShareOnX', 'assets/ui/background/Share_on_X.png');
         this.load.image('button_play2', 'assets/ui/background/button_play2.svg');
         this.load.image('button_leaderboard', 'assets/ui/background/button_leaderboard.svg');
-
     }
 
-    create() {
-        // พื้นหลัง
+    async create() {
+        // Set up the background
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
 
-        // Animation ของ Achievement
+        // Achievement animation
         const stars = this.add.image(512, 680, 'Achievement').setOrigin(0.5);
         this.tweens.add({
             targets: stars,
@@ -27,67 +26,110 @@ export class Achievement extends Phaser.Scene {
             ease: 'Bounce.easeOut',
         });
 
-        // ปุ่มต่าง ๆ (Settings, Exit, Leaderboard)
+        // Add buttons
         const leaderboardButton = this.add.image(440, 920, 'button_leaderboard').setScale(0.9).setInteractive();
         const playButton = this.add.image(590, 920, 'button_play2').setScale(0.9).setInteractive();
         const shareOnXButton = this.add.image(512, 1100, 'ShareOnX').setScale(0.18).setInteractive();
         const inviteFriendsButton = this.add.image(512, 1250, 'InviteFriends').setScale(0.18).setInteractive();
-  
 
-        // การจัดการเหตุการณ์คลิกปุ่ม
-        playButton.on('pointerdown', () => console.log('Settings Clicked'));
+        // Button interactions
+        playButton.on('pointerdown', () => console.log('Play Clicked'));
         inviteFriendsButton.on('pointerdown', () => console.log('Invite Friends Clicked'));
 
         this.addHoverEffect(playButton);
         this.addHoverEffect(leaderboardButton);
         this.addHoverEffect(inviteFriendsButton);
-        this.addHoverEffect(shareOnXButton, 'ShareOnX Button Hovered');
+        this.addHoverEffect(shareOnXButton);
 
-        // **แสดงข้อความหลังจากเพิ่ม UI อื่น ๆ** เพื่อให้แน่ใจว่าข้อความอยู่ด้านบนสุด
-        const userAddress = this.registry.get('userAddress') || 'Not Connected';
-        const tokenBalance = this.registry.get('tokenBalance') || '0.0';
-        const highScore = this.registry.get('highscore') || 0;
-        const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+        // Fetch and display user data
+        const userAddress = await this.getUserAddress();
+        if (userAddress) {
+            await this.displayUserData(userAddress);
+        } else {
+            this.displayError('MetaMask not connected.');
+        }
 
-        this.add.text(565, 585, `${shortAddress}`, {
-            fontFamily: 'Arial Black',
-            fontSize: '30px',
-            color: '#FFD700',
-            stroke: '#000000',
-            strokeThickness: 6
-        }).setOrigin(0.5);
-
-        this.add.text(535, 640, ` ${highScore}`, {
-            fontFamily: 'Arial Black',
-            fontSize: '30px',
-            color: '#FFD700',
-            stroke: '#000000',
-            strokeThickness: 6
-        }).setOrigin(0.5);
-
-        this.add.text(550, 705, `${tokenBalance} tokens`, {
-            fontFamily: 'Arial Black',
-            fontSize: '30px',
-            color: '#FFD700',
-            stroke: '#000000',
-            strokeThickness: 6
-        }).setOrigin(0.5);
-
-     
-        // ข้อความเชิญชวนเพื่อนพร้อมเอฟเฟกต์พิมพ์ข้อความ
+        // Typing effect text
         const bonusText = 'Invite friends to play. Both you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
         this.addTypingEffect(512, 1400, bonusText, {
             fontSize: '32px',
             fontFamily: 'Arial',
             color: '#ffffff',
-            lineSpacing: 5
+            lineSpacing: 5,
         });
 
-        // คลิกเพื่อกลับไปที่เมนูหลัก
+        // Return to main menu on click
         this.input.once('pointerdown', () => {
             this.registry.set('highscore', 0);
             this.scene.start('MainMenu');
         });
+    }
+
+    async getUserAddress() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                return await signer.getAddress();
+            } catch (error) {
+                console.error('MetaMask login failed:', error);
+                return null;
+            }
+        } else {
+            console.log('MetaMask not detected');
+            return null;
+        }
+    }
+
+    async displayUserData(userAddress) {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${apiUrl}player-stats/${userAddress}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+
+            const { score, gamesPlayed, userAddress: address } = await response.json();
+            const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+            this.add.text(565, 585, `${shortAddress}`, {
+                fontFamily: 'Arial Black',
+                fontSize: '30px',
+                color: '#FFD700',
+                stroke: '#000000',
+                strokeThickness: 6,
+            }).setOrigin(0.5);
+
+            this.add.text(535, 645, `${score}`, {
+                fontFamily: 'Arial Black',
+                fontSize: '30px',
+                color: '#FFD700',
+                stroke: '#000000',
+                strokeThickness: 6,
+            }).setOrigin(0.5);
+
+            this.add.text(550, 705, `${gamesPlayed}`, {
+                fontFamily: 'Arial Black',
+                fontSize: '30px',
+                color: '#FFD700',
+                stroke: '#000000',
+                strokeThickness: 6,
+            }).setOrigin(0.5);
+
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            this.displayError('Error fetching user data.');
+        }
+    }
+
+    displayError(message) {
+        this.add.text(512, 384, message, {
+            fontFamily: 'Arial',
+            fontSize: '28px',
+            color: '#FF0000',
+        }).setOrigin(0.5);
     }
 
     addHoverEffect(button) {
@@ -108,7 +150,7 @@ export class Achievement extends Phaser.Scene {
                     this.time.removeAllEvents();
                 }
             },
-            repeat: text.length - 1
+            repeat: text.length - 1,
         });
     }
 }
