@@ -106,6 +106,7 @@ export class HallOfFame extends Phaser.Scene {
         });
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
+            this.scene.start('InviteCodeScreen');
         });
 
         this.addHoverEffect(playButton, 'Play Button Hovered');

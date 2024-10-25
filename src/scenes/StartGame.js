@@ -33,6 +33,7 @@ export class ClickerGame extends Scene {
         this.load.image('button_sound_on', 'assets/ui/background/button_sound_on.svg');
         this.load.image('button_sound_off', 'assets/ui/background/button_sound_off.svg');
         this.load.image('play_button', 'assets/ui/background/Play.png');
+        this.load.image('monster', 'assets/ui/background/monster.png');
     }
 
     create() {
@@ -61,6 +62,7 @@ export class ClickerGame extends Scene {
         const timeBg = this.add.image(140, 200 + topMargin, 'Clock').setDisplaySize(240, 75).setAlpha(1);
         const scoreBg = this.add.image(850, 200 + topMargin, 'Score').setDisplaySize(230, 75).setAlpha(1);
         const walletIcon = this.add.image(850, 80 + topMargin, 'wallet').setDisplaySize(240, 95).setAlpha(1);
+        const monster = this.add.image(775, 80 + topMargin, 'monster').setDisplaySize(110, 110).setAlpha(1).setInteractive();
     
         const textStyle = {
             fontFamily: 'Arial Black',
@@ -105,13 +107,19 @@ export class ClickerGame extends Scene {
         this.addHoverEffect(leaderboardButton);
         this.addHoverEffect(soundButton);
         this.addHoverEffect(settingButton);
-    
+        this.addHoverEffect(monster);
+
         // Sound Button Toggle
         soundButton.on('pointerdown', () => {
             this.soundOn = !this.soundOn;
             soundButton.setTexture(this.soundOn ? 'button_sound_on' : 'button_sound_off');
         });
-    
+        
+        monster.on('pointerdown', () => {
+            console.log('Navigating to Achievement Scene');
+            this.scene.start('Achievement'); 
+        });
+
         // Leaderboard Button Action
         leaderboardButton.on('pointerdown', () => {
             this.scene.start('Leaderboard', { roomId: this.roomId });
@@ -372,22 +380,32 @@ export class ClickerGame extends Scene {
         });
     }
 
-    submitScore() {
+    async submitScore() {
         const userAddress = this.registry.get('userAddress') || this.userAddress;
         const score = this.registry.get('highscore') || this.score;
         const tokenBalance = this.tokenBalance !== undefined ? this.tokenBalance : 0;
-        const apiUrl =
-            import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    
+        // ตรวจสอบว่า userAddress ถูกต้อง
         if (!userAddress) {
             console.log('User not logged in, score not submitted.');
+            alert('You need to log in before submitting a score.');
             return;
         }
-
-        fetch(`${apiUrl}submit-score`, {
+    
+        // ตรวจสอบว่า score เป็นตัวเลขที่ไม่ติดลบ
+        if (isNaN(score) || score < 0) {
+            console.error('Invalid score value:', score);
+            alert('Score must be a non-negative number.');
+            return;
+        }
+    
+        try {
+            // ส่งข้อมูลไปที่ backend ด้วย async/await
+            const response = await fetch(`${apiUrl}submit-score`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 credentials: 'include',
                 body: JSON.stringify({
@@ -395,11 +413,25 @@ export class ClickerGame extends Scene {
                     score: score,
                     tokenBalance: tokenBalance,
                 }),
-            })
-            .then(response => response.text())
-            .then(data => console.log('Score submitted:', data))
-            .catch(error => console.error('Error submitting score:', error));
+            });
+    
+            // ตรวจสอบว่า response สำเร็จหรือไม่
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Failed to submit score:', errorData);
+                alert(`Failed to submit score: ${errorData.error || 'Unknown error'}`);
+                return;
+            }
+    
+            const result = await response.text();
+            console.log('Score submitted successfully:', result);
+            alert('Score submitted successfully!');
+        } catch (error) {
+            console.error('Error submitting score:', error);
+            alert('Error occurred while submitting score. Please try again.');
+        }
     }
+    
 
 
 

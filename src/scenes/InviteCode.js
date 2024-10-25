@@ -10,14 +10,17 @@ export class InviteCodeScreen extends Phaser.Scene {
         this.load.image('wallet', 'assets/ui/background/wallet.svg');
     }
 
-    create() {
+    create(data) {
+        // รับ scene ก่อนหน้า จาก data parameter
+        this.previousScene = data.previousScene || 'MainMenu'; // ค่าเริ่มต้นเป็น MainMenu ถ้าไม่มี
+
         // Set up the main background
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
 
         // Close button (Exit)
         const closeButton = this.add.image(930, 130, 'button_exit').setScale(0.9).setInteractive();
         closeButton.on('pointerdown', () => {
-            this.scene.start('HowToPlay'); // Return to HowToPlay scene
+            this.scene.start(this.previousScene); // กลับไปยัง scene ก่อนหน้า
         });
         this.addHoverEffect(closeButton);
 
@@ -76,24 +79,26 @@ export class InviteCodeScreen extends Phaser.Scene {
         input.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter' && input.value.length === 6) {
                 const code = input.value;
-                console.log(`Submitting code: ${code}`);
+                console.log(`Submitting code: ${code}`); // ตรวจสอบโค้ดที่ถูกส่งไป
+        
                 try {
                     const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}submit-invite`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ code })
+                        body: JSON.stringify({ code }), // ตรวจสอบว่าโครงสร้างนี้ถูกต้อง
                     });
-    
+        
+                    const result = await response.json();
+                    console.log('Response from server:', result); // ดู response ที่ได้รับจาก backend
+        
                     if (response.ok) {
-                        const result = await response.json();
-                        console.log('Code submitted successfully:', result);
                         alert('Invite code submitted successfully!');
-                        input.value = ''; // ล้างช่อง input หลังส่งสำเร็จ
+                        input.value = ''; // ล้างช่อง input
                     } else {
-                        console.error('Failed to submit invite code');
-                        alert('Failed to submit invite code. Please try again.');
+                        console.error('Failed to submit invite code:', result);
+                        alert(result.error || 'Failed to submit invite code. Please try again.');
                     }
                 } catch (error) {
                     console.error('Error submitting invite code:', error);
@@ -101,14 +106,13 @@ export class InviteCodeScreen extends Phaser.Scene {
                 }
             }
         });
+        
     
         document.body.appendChild(input);
     
         // ลบ input field เมื่อออกจาก scene เพื่อป้องกัน memory leak
         this.events.on('shutdown', () => input.remove());
     }
-    
-    
     
 
     addTypingEffect(x, y, text, style) {
