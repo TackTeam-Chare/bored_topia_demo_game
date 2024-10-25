@@ -45,6 +45,7 @@ export class Achievement extends Phaser.Scene {
         const userAddress = await this.getUserAddress();
         if (userAddress) {
             await this.displayUserData(userAddress);
+            await this.displayInviteCount(userAddress);
         } else {
             this.displayError('MetaMask not connected.');
         }
@@ -63,6 +64,30 @@ export class Achievement extends Phaser.Scene {
             this.registry.set('highscore', 0);
             this.scene.start('MainMenu');
         });
+    }
+
+    async displayInviteCount(userAddress) {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${apiUrl}invites-count/${userAddress}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch invite count');
+            }
+
+            const { inviteCount } = await response.json();
+
+            this.add.text(540, 765, `${inviteCount}`, {
+                fontFamily: 'Arial Black',
+                fontSize: '28px',
+                color: '#FFD700',
+                stroke: '#000000',
+                strokeThickness: 6,
+            }).setOrigin(0.5);
+        } catch (error) {
+            console.error('Error fetching invite count:', error);
+            this.displayError('Error fetching invite count.');
+        }
     }
 
     async getUserAddress() {
@@ -102,7 +127,7 @@ export class Achievement extends Phaser.Scene {
                 strokeThickness: 6,
             }).setOrigin(0.5);
 
-            this.add.text(535, 645, `${score}`, {
+            this.add.text(540, 645, `${score}`, {
                 fontFamily: 'Arial Black',
                 fontSize: '30px',
                 color: '#FFD700',
@@ -110,7 +135,7 @@ export class Achievement extends Phaser.Scene {
                 strokeThickness: 6,
             }).setOrigin(0.5);
 
-            this.add.text(550, 705, `${gamesPlayed}`, {
+            this.add.text(540, 705, `${gamesPlayed}`, {
                 fontFamily: 'Arial Black',
                 fontSize: '30px',
                 color: '#FFD700',

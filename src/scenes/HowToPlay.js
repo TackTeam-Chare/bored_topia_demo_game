@@ -27,8 +27,6 @@ export class HowToPlay extends Scene {
         this.load.image('connectWallet', 'assets/ui/background/Connect_wallet.png');
         this.load.image('buttonPlay', 'assets/ui/background/button_play.svg');
         this.load.image('buttonSkip', 'assets/ui/background/button_skip.svg');
-        this.load.css('fonts', 'assets/fonts/AlteHaasGroteskBold.ttf');
-        this.load.css('fonts', 'assets/fonts/AlteHaasGroteskRegular.ttf');
     }
 
     create() {
@@ -53,8 +51,8 @@ export class HowToPlay extends Scene {
             fontSize: '36px',
             color: '#ffffff',
             align: 'center',
-            wordWrap: { width: 400, useAdvancedWrap: true }, 
-            lineSpacing: 15 
+            wordWrap: { width: 400, useAdvancedWrap: true },
+            lineSpacing: 15
         }).setOrigin(0.5);
 
         this.typeText(instructionsText); // Start typing the first instruction
@@ -72,9 +70,31 @@ export class HowToPlay extends Scene {
             this.registry.set('userAddress', userAddress);
             this.registry.set('tokenBalance', tokenBalance);
 
-            await this.assignRoom();
-            this.startGame();
+            const isNewUser = await this.checkIfNewUser(userAddress);
+            if (isNewUser) {
+                this.scene.start('InviteCodeScreen');  // Redirect to invite code screen if new
+            } else {
+                await this.assignRoom();
+                this.startGame();
+            }
         });
+    }
+
+    async checkIfNewUser(userAddress) {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        try {
+            const response = await fetch(`${apiUrl}check-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userAddress })
+            });
+
+            const data = await response.json();
+            return data.isNewUser;  // Expect backend to return { isNewUser: true/false }
+        } catch (error) {
+            console.error('Error checking user:', error);
+            return false;
+        }
     }
 
     typeText(instructionsText) {
@@ -130,7 +150,6 @@ export class HowToPlay extends Scene {
             const response = await fetch(`${import.meta.env.VITE_API_URL}assign-room`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify({ userAddress: this.userAddress })
             });
 

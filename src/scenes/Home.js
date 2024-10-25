@@ -65,7 +65,7 @@ export class MainMenu extends Scene {
 
     async showLoadingAnimation() {
         // Initialize loading at the Start button's position
-        const loadImage = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Load_1').setScale(1.8);
+        const loadImage = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Load_1').setScale(2.5);
 
         // Loop through Load_1, Load_2, and Load_3
         for (let i = 1; i <= 3; i++) {
