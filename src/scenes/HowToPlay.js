@@ -4,41 +4,51 @@ import { getUserBlobzBalance } from '../lobzTokenChecker.js';
 export class HowToPlay extends Scene {
     constructor() {
         super('HowToPlay');
-        this.typingText = '';
         this.instructions = [
             "1. Tap to win: Click on the falling coins to boost your score.",
             "2. Dodge the skulls: Avoid the spooky skulls to keep your points safe.",
             "3. Join the party: Compete against 10 other players in each room.",
-            "4. Become the Giver: If you're the 6th highest scorer at the end of the round, you'll share your score with others.",
-            "5. Unlock the bonus: Share your invite link to get a 50% bonus on your friend’s first round scores.",
-            "6. Climb the leaderboard: Aim for the top spot and compete against others!"
+            "4. Become the Giver: Share your score with others if you're the 6th highest scorer.",
+            "5. Unlock the bonus: Share your invite to get a 50% bonus on your friend’s scores.",
+            "6. Climb the leaderboard: Aim for the top spot!"
         ];
+        this.instructionImages = ['Tap', 'Dodge', 'Join', 'Become', 'Unlock', 'Climb'];
         this.currentInstructionIndex = 0;
-        this.textIndex = 0;
+        this.currentImage = null; // Track the current displayed image
+        this.typingText = '';
         this.userAddress = '';
         this.tokenBalance = '';
         this.roomId = null;
-        this.isTrialMode = true; // Start in trial mode by default
+        this.isTrialMode = true;
+        this.isImageMode = false; // Track if images are being displayed
     }
 
     preload() {
+        // Preload background and UI assets
         this.load.image('howToPlayBackground', 'assets/ui/background/HowToPlayPage.png');
         this.load.image('howToPlay', 'assets/ui/background/HowToPlay.png');
         this.load.image('connectWallet', 'assets/ui/background/Connect_wallet.png');
         this.load.image('buttonPlay', 'assets/ui/background/button_play.svg');
         this.load.image('buttonSkip', 'assets/ui/background/button_skip.svg');
+
+        // Preload all instruction images to prevent delays
+        this.instructionImages.forEach(image => {
+            this.load.image(image, `assets/ui/background/${image}.svg`);
+        });
     }
 
     create() {
+        // Set up the background
         const howToPlayBg = this.add.image(0, 0, 'howToPlayBackground').setOrigin(0, 0);
         howToPlayBg.setScale(Math.max(
             this.sys.game.config.width / howToPlayBg.width,
             this.sys.game.config.height / howToPlayBg.height
         ));
 
-        const howToPlay = this.add.image(512, 400, 'howToPlay').setScale(0.2);
+        // Add the title with animation
+        const howToPlayTitle = this.add.image(512, 400, 'howToPlay').setScale(0.2);
         this.tweens.add({
-            targets: howToPlay,
+            targets: howToPlayTitle,
             y: 410,
             duration: 2000,
             yoyo: true,
@@ -46,7 +56,8 @@ export class HowToPlay extends Scene {
             ease: 'Sine.easeInOut'
         });
 
-        const instructionsText = this.add.text(512, 400, '', {
+        // Add instructions text
+        this.instructionsText = this.add.text(512, 400, '', {
             fontFamily: 'AlteHaasGroteskRegular',
             fontSize: '36px',
             color: '#ffffff',
@@ -55,29 +66,86 @@ export class HowToPlay extends Scene {
             lineSpacing: 15
         }).setOrigin(0.5);
 
-        this.typeText(instructionsText); // Start typing the first instruction
-
-        this.createButtons();
+        this.createButtons(); // Create Play, Skip, and Wallet buttons
+        this.typeText(this.instructionsText); // Start typing instructions
 
         document.addEventListener('walletConnected', async (event) => {
             const { userAddress, tokenBalance } = event.detail;
-
             this.userAddress = userAddress;
             this.tokenBalance = tokenBalance;
             this.isTrialMode = false;
 
-            console.log(`Wallet connected: ${userAddress}, Balance: ${tokenBalance}`);
-            this.registry.set('userAddress', userAddress);
-            this.registry.set('tokenBalance', tokenBalance);
-
             const isNewUser = await this.checkIfNewUser(userAddress);
             if (isNewUser) {
-                this.scene.start('InviteCodeScreen');  // Redirect to invite code screen if new
+                this.scene.start('InviteCodeScreen');
             } else {
                 await this.assignRoom();
                 this.startGame();
             }
         });
+    }
+
+    typeText(instructionsText) {
+        const currentInstruction = this.instructions[this.currentInstructionIndex];
+
+        if (this.typingText.length < currentInstruction.length) {
+            this.typingText += currentInstruction[this.typingText.length];
+            instructionsText.setText(this.typingText);
+            this.time.delayedCall(50, () => this.typeText(instructionsText));
+        } else {
+            this.time.delayedCall(1000, () => this.nextInstruction(instructionsText));
+        }
+    }
+
+    nextInstruction(instructionsText) {
+        this.currentInstructionIndex++;
+        if (this.currentInstructionIndex < this.instructions.length) {
+            this.typingText = '';
+            this.typeText(instructionsText);
+        } else {
+            this.currentInstructionIndex = 0; // Reset index if all instructions are shown
+        }
+    }
+
+    createButtons() {
+        const playButton = this.add.image(350, 620, 'buttonPlay').setInteractive().setScale(0.6);
+        playButton.on('pointerdown', () => {
+            this.isImageMode = true; // Activate image mode
+            this.instructionsText.setVisible(false); // Hide instructions
+            this.showNextImage(); // Display the first image
+        });
+        this.addHoverEffect(playButton);
+
+        const skipButton = this.add.image(650, 620, 'buttonSkip').setInteractive().setScale(0.6);
+        skipButton.on('pointerdown', () => {
+            this.startGame(); // Skip to the game
+        });
+        this.addHoverEffect(skipButton);
+
+        const connectWalletButton = this.add.image(this.cameras.main.width / 2, 780, 'connectWallet')
+            .setInteractive()
+            .setScale(0.15);
+        connectWalletButton.on('pointerdown', () => getUserBlobzBalance());
+        this.addHoverEffect(connectWalletButton);
+    }
+
+    showNextImage() {
+        // Remove any currently displayed image
+        if (this.currentImage) this.currentImage.destroy();
+
+        if (this.currentInstructionIndex < this.instructionImages.length) {
+            const imageName = this.instructionImages[this.currentInstructionIndex];
+            this.currentImage = this.add.image(512, 400, imageName).setScale(1.3).setOrigin(0.5);
+
+            this.currentImage.setInteractive();
+            this.currentImage.on('pointerdown', () => {
+                this.currentInstructionIndex++;
+                this.showNextImage(); // Load the next image immediately
+            });
+        } else {
+            console.log('All images displayed. Starting game...');
+            this.startGame(); // Start game after the last image
+        }
     }
 
     async checkIfNewUser(userAddress) {
@@ -90,59 +158,11 @@ export class HowToPlay extends Scene {
             });
 
             const data = await response.json();
-            return data.isNewUser;  // Expect backend to return { isNewUser: true/false }
+            return data.isNewUser;
         } catch (error) {
             console.error('Error checking user:', error);
             return false;
         }
-    }
-
-    typeText(instructionsText) {
-        const currentInstruction = this.instructions[this.currentInstructionIndex];
-
-        if (this.textIndex < currentInstruction.length) {
-            this.typingText += currentInstruction[this.textIndex];
-            instructionsText.setText(this.typingText);
-            this.textIndex++;
-            this.time.delayedCall(50, () => this.typeText(instructionsText));
-        } else {
-            this.time.delayedCall(1000, () => this.nextInstruction(instructionsText));
-        }
-    }
-
-    nextInstruction(instructionsText) {
-        this.currentInstructionIndex++;
-        if (this.currentInstructionIndex < this.instructions.length) {
-            this.typingText = '';
-            this.textIndex = 0;
-            this.typeText(instructionsText);
-        }
-    }
-
-    createButtons() {
-        const playButton = this.add.image(350, 620, 'buttonPlay').setInteractive().setScale(0.6);
-        playButton.on('pointerdown', () => {
-            if (!this.isTrialMode && !this.roomId) {
-                console.error('Room not assigned yet.');
-            } else {
-                this.startGame();
-            }
-        });
-        this.addHoverEffect(playButton);
-
-        const skipButton = this.add.image(650, 620, 'buttonSkip').setInteractive().setScale(0.6);
-        skipButton.on('pointerdown', () => {
-            console.log('Starting trial mode without login...');
-            this.isTrialMode = true;
-            this.startGame();
-        });
-        this.addHoverEffect(skipButton);
-
-        const connectWalletButton = this.add.image(this.cameras.main.width / 2, 780, 'connectWallet').setInteractive().setScale(0.15);
-        connectWalletButton.on('pointerdown', () => {
-            getUserBlobzBalance();
-        });
-        this.addHoverEffect(connectWalletButton);
     }
 
     async assignRoom() {
@@ -154,12 +174,8 @@ export class HowToPlay extends Scene {
             });
 
             const data = await response.json();
-            if (response.ok) {
-                this.roomId = data.roomId;
-                console.log(`Assigned to Room ID: ${this.roomId}`);
-            } else {
-                console.error('Failed to assign room:', data);
-            }
+            this.roomId = data.roomId;
+            console.log(`Assigned to Room ID: ${this.roomId}`);
         } catch (error) {
             console.error('Error assigning room:', error);
         }
@@ -168,8 +184,8 @@ export class HowToPlay extends Scene {
     startGame() {
         console.log(`Starting game with Room ID: ${this.roomId}`);
         this.scene.start('ClickerGame', {
-            userAddress: this.userAddress || '',
-            tokenBalance: this.tokenBalance || 0,
+            userAddress: this.userAddress,
+            tokenBalance: this.tokenBalance,
             roomId: this.roomId,
             isTrialMode: this.isTrialMode
         });
