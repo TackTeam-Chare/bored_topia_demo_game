@@ -15,7 +15,7 @@ export class Preloader extends Scene
         this.load.image('Score', 'assets/ui/background/Score.svg');
         this.load.image('Clock', 'assets/ui/background/Clock.svg');
         this.load.image('Play', 'assets/ui/background/Play.png');
-
+        this.load.image('OpeningPage', 'assets/ui/background/OpeningPage.png');
         // coin
         this.load.setPath('assets/ui/coins');
         this.load.atlas('coinBonze', 'coinBonze.png', 'coinBonze.json');

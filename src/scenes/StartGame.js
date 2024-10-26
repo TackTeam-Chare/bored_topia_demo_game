@@ -222,7 +222,8 @@ export class ClickerGame extends Scene {
         const randomCoinType = this.weightedRandom(coinTypes);
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
 
-        coin.setScale(1.5);
+        coin.setScale(1.9);
+
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
 

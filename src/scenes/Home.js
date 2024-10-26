@@ -12,19 +12,23 @@ export class MainMenu extends Scene {
         this.load.image('Load_1', 'assets/ui/background/Load_1.svg');
         this.load.image('Load_2', 'assets/ui/background/Load_2.svg');
         this.load.image('Load_3', 'assets/ui/background/Load_3.svg');
-        this.load.image('OpeningPage', 'assets/ui/background/OpeningPage.png');
+        // this.load.image('OpeningPage', 'assets/ui/background/OpeningPage.png');
     }
 
     create() {
         // Set up background
-        const bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
-        bg.setDisplaySize(this.scale.width, this.scale.height);
+        this.bg = this.add.image(0, 0, 'OpeningPage').setOrigin(0, 0);
+        this.bg.setDisplaySize(this.scale.width, this.scale.height);
 
         // Add logo with animation
-        const logo = this.add.image(this.scale.width / 2, 350, 'logo').setScale(0.3);
-        this.tweens.add({
-            targets: logo,
-            y: 290,
+        this.logo = this.add.image(this.scale.width / 2, this.scale.height * 0.25, 'logo').setScale(0.3);
+
+        // Define bounds for the logo animation based on screen size
+        this.updateLogoAnimationBounds();
+
+        this.tween = this.tweens.add({
+            targets: this.logo,
+            y: this.minY,
             duration: 2000,
             yoyo: true,
             repeat: -1,
@@ -32,17 +36,17 @@ export class MainMenu extends Scene {
         });
 
         // Add Start button with interactivity
-        const startButton = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Start')
+        this.startButton = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Start')
             .setInteractive()
             .setScale(1.5);
 
         // Handle button hover effects
-        startButton.on('pointerover', () => startButton.setScale(1.6));
-        startButton.on('pointerout', () => startButton.setScale(1.5));
+        this.startButton.on('pointerover', () => this.startButton.setScale(1.6));
+        this.startButton.on('pointerout', () => this.startButton.setScale(1.5));
 
         // Handle button click to start loading animation
-        startButton.on('pointerdown', async () => {
-            startButton.destroy();  // Hide button after click
+        this.startButton.on('pointerdown', async () => {
+            this.startButton.destroy();  // Hide button after click
             await this.showLoadingAnimation();  // Run loading sequence
 
             const userAddress = await this.checkMetaMaskLogin();
@@ -57,10 +61,23 @@ export class MainMenu extends Scene {
         this.scale.on('resize', this.resize, this);
     }
 
+    updateLogoAnimationBounds() {
+        // Calculate bounds based on screen height
+        this.minY = this.scale.height * 0.25;
+        this.maxY = this.scale.height * 0.3;
+        this.logo.setY(this.maxY);  // Reset to maxY at the start of animation
+    }
+
     resize() {
-        // Ensure elements adjust on resize
-        const startButton = this.add.image(this.scale.width / 2, this.scale.height * 0.85, 'Start');
-        startButton.setScale(1.5);
+        // Update background size
+        this.bg.setDisplaySize(this.scale.width, this.scale.height);
+
+        // Recalculate positions and animation bounds
+        this.logo.setX(this.scale.width / 2);
+        this.updateLogoAnimationBounds();
+        
+        // Update Start button position
+        this.startButton.setPosition(this.scale.width / 2, this.scale.height * 0.85);
     }
 
     async showLoadingAnimation() {
@@ -70,7 +87,7 @@ export class MainMenu extends Scene {
         // Loop through Load_1, Load_2, and Load_3
         for (let i = 1; i <= 3; i++) {
             loadImage.setTexture(`Load_${i}`);  // Update texture
-            await this.wait(400);  // Wait 1 second for each image
+            await this.wait(400);  // Wait 400 milliseconds for each image
         }
 
         loadImage.destroy();  // Remove loading image after sequence completes
