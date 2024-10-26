@@ -69,7 +69,7 @@ export class GameOver extends Phaser.Scene {
         playButton.on('pointerdown', () => {
             console.log('Leaderboard');
             // this.scene.start('Leaderboard', { roomId });
-            this.scene.start('Leaderboard', { roomId: data.roomId || 'default-room-id' });
+            this.scene.start('Leaderboard', { roomId: data.roomId || 'N/A' });
 
         });
 
@@ -80,7 +80,7 @@ export class GameOver extends Phaser.Scene {
         this.time.delayedCall(3000, () => {
             console.log('Auto-redirecting to Leaderboard...');
             // this.scene.start('Leaderboard', { roomId });
-            this.scene.start('Leaderboard', { roomId: data.roomId || 'default-room-id' });
+            this.scene.start('Leaderboard', { roomId: data.roomId || 'N/A' });
 
         });
     }

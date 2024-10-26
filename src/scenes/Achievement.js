@@ -5,7 +5,7 @@ export class Achievement extends Phaser.Scene {
 
      // Use init to receive roomId
      init(data) {
-        this.roomId = data.roomId || 'default-room-id'; // Store roomId with a default fallback
+        this.roomId = data.roomId || 'N/A'; // Store roomId with a default fallback
         console.log(`Achievement Scene started with Room ID: ${this.roomId}`);
     }
 
