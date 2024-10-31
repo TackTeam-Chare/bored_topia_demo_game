@@ -10,6 +10,10 @@ export class InviteCodeScreen extends Phaser.Scene {
         this.load.image('wallet', 'assets/ui/background/wallet.svg');
     }
 
+    init(data) {
+        this.userAddress = data.userAddress || '';
+    }
+
     create(data) {
         // รับ scene ก่อนหน้า จาก data parameter
         this.previousScene = data.previousScene || 'MainMenu'; // ค่าเริ่มต้นเป็น MainMenu ถ้าไม่มี
@@ -17,7 +21,29 @@ export class InviteCodeScreen extends Phaser.Scene {
         // Set up the main background
         const bg = this.add.image(512, 384, 'BG').setOrigin(0.5);
 
-        // Close button (Exit)
+         // แสดงเฉพาะ 6 ตัวท้ายของที่อยู่ MetaMask
+        const shortAddress = this.userAddress.slice(-6);
+      
+          // Display score text
+          const shortAddressTextStyle = { 
+            fontFamily: 'Arial Black', 
+            fontSize: 38, 
+            color: '#ffffff', 
+            stroke: '#000000', 
+            strokeThickness: 4 
+        };
+
+        const shortAddressText = this.add.text(600, 1200, `${shortAddress}`, shortAddressTextStyle)
+        .setAlign('center')
+        .setOrigin(0.5);
+
+    this.tweens.add({
+        targets: shortAddressText,
+        scale: { from: 0.9, to: 1.1 },
+        duration: 1000,
+        yoyo: true,
+        repeat: -1
+    });
         const closeButton = this.add.image(930, 130, 'button_exit').setScale(0.9).setInteractive();
         closeButton.on('pointerdown', () => {
             this.scene.start(this.previousScene); // กลับไปยัง scene ก่อนหน้า
@@ -25,7 +51,7 @@ export class InviteCodeScreen extends Phaser.Scene {
         this.addHoverEffect(closeButton);
 
         // Display Invite Code Label
-        this.add.text(580, 810, 'YOUR INVITE CODE', {
+        this.add.text(600, 1300, 'YOUR INVITE CODE', {
             fontFamily: 'Arial Black',
             fontSize: '32px',
             color: '#FFD700',
@@ -41,9 +67,9 @@ export class InviteCodeScreen extends Phaser.Scene {
 
         // Add typing animation for the invite description text
         const inviteText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
-        this.addTypingEffect(512, 1150, inviteText, {
+        this.addTypingEffect(512, 1420, inviteText, {
             fontFamily: 'Arial',
-            fontSize: '30px',
+            fontSize: '32px',
             color: '#FFFFFF',
             align: 'center',
             wordWrap: { width: 600 },
@@ -61,14 +87,14 @@ export class InviteCodeScreen extends Phaser.Scene {
         input.placeholder = 'Enter Invite Code';
         input.maxLength = 6;
     
-        const offsetX = 60;
+        const offsetX = 37;
         input.style.position = 'absolute';
-        input.style.top = `${window.innerHeight / 2 - 20}px`;
-        input.style.left = `${window.innerWidth / 2 - 130 + offsetX}px`;
+        input.style.top = `${window.innerHeight / 2 - 15}px`;
+        input.style.left = `${window.innerWidth / 2 - 100 + offsetX}px`;
     
-        input.style.width = '240px';
+        input.style.width = '200px';
         input.style.height = '40px';
-        input.style.fontSize = '24px';
+        input.style.fontSize = '18px';
         input.style.border = 'none';
         input.style.textAlign = 'center';
         input.style.backgroundColor = 'rgba(255, 255, 255, 0)';
@@ -108,7 +134,7 @@ export class InviteCodeScreen extends Phaser.Scene {
                         {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ code, inviterAddress }),  // ส่งที่อยู่ผู้เชิญไป backend
+                            body: JSON.stringify({ code, userAddress: inviterAddress }),  // ส่งที่อยู่ผู้เชิญไป backend
                         }
                     );
     

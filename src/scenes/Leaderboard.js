@@ -169,7 +169,9 @@ export class Leaderboard extends Phaser.Scene {
 
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
-            this.scene.start('InviteCodeScreen');
+            this.scene.start('InviteCodeScreen', {
+                userAddress: userAddress,
+            });
         });
 
 

@@ -45,9 +45,12 @@ export class Achievement extends Phaser.Scene {
 
         inviteFriendsButton.on('pointerdown', () => {
             console.log('Invite Friends Clicked');
-            this.scene.start('InviteCodeScreen');
+            this.scene.start('InviteCodeScreen', {
+                userAddress: userAddress,
+            });
         });
-
+         
+           
         leaderBoardButton.on('pointerdown', () => {
             console.log('Leaderboard Clicked');
             this.scene.start('Leaderboard', { roomId: this.roomId });
