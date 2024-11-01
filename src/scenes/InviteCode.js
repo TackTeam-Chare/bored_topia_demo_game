@@ -33,7 +33,7 @@ export class InviteCodeScreen extends Phaser.Scene {
             strokeThickness: 4 
         };
 
-        const shortAddressText = this.add.text(600, 1200, `${shortAddress}`, shortAddressTextStyle)
+        const shortAddressText = this.add.text(512, 1280, `${shortAddress}`, shortAddressTextStyle)
         .setAlign('center')
         .setOrigin(0.5);
 
@@ -51,7 +51,7 @@ export class InviteCodeScreen extends Phaser.Scene {
         this.addHoverEffect(closeButton);
 
         // Display Invite Code Label
-        this.add.text(600, 1300, 'YOUR INVITE CODE', {
+      const inviteCode =  this.add.text(512, 1350, 'YOUR INVITE CODE', {
             fontFamily: 'Arial Black',
             fontSize: '32px',
             color: '#FFD700',
@@ -59,6 +59,14 @@ export class InviteCodeScreen extends Phaser.Scene {
             strokeThickness: 6,
         }).setOrigin(0.5);
 
+        
+    this.tweens.add({
+        targets: inviteCode,
+        scale: { from: 0.9, to: 1.1 },
+        duration: 1000,
+        yoyo: true,
+        repeat: -1
+    });
         // Wallet background for the invite code input
         const codeBox = this.add.image(512, 880, 'wallet').setScale(2);
 
@@ -67,7 +75,7 @@ export class InviteCodeScreen extends Phaser.Scene {
 
         // Add typing animation for the invite description text
         const inviteText = 'Invite friends to play.\nBoth you and your friend will earn a sweet\n50% bonus on your friend\'s first round scores.';
-        this.addTypingEffect(512, 1420, inviteText, {
+        this.addTypingEffect(512, 1130, inviteText, {
             fontFamily: 'Arial',
             fontSize: '32px',
             color: '#FFFFFF',
