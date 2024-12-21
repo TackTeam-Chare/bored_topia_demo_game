@@ -169,12 +169,11 @@ export class ClickerGame extends Scene {
     dropCoin() {
         if (this.isGameOver) return;
 
-        const dispenserX = 512;
-        const dispenserY = 330;
+    const dispenserX = this.scale.width / 2; // ตำแหน่งตรงกลางจอ
+    const dispenserY = this.scale.height * 0.3; // ปรับตามสัดส่วนจอ
 
-        const x = dispenserX + Phaser.Math.Between(-30, 30);
-        const y = dispenserY + Phaser.Math.Between(-10, 10);
-
+    const x = dispenserX + Phaser.Math.Between(-50, 50);
+    const y = dispenserY + Phaser.Math.Between(-20, 20);
         const coinTypes = [{
                 key: 'coinBonze',
                 rotateAnim: 'Bonze_rotate',
@@ -222,8 +221,14 @@ export class ClickerGame extends Scene {
         const randomCoinType = this.weightedRandom(coinTypes);
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
 
-        coin.setScale(1.9);
+      
+        
+         // ปรับขนาดเหรียญให้เหมาะสมกับหน้าจอ
+        const coinScale = this.scale.width < 768 ? 2.5 : 1.9; // ถ้าหน้าจอแคบให้ขนาดใหญ่ขึ้น
+        coin.setScale(coinScale);
 
+    // เพิ่ม Hit Area สำหรับมือถือ
+         coin.setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Circle(0, 0, 60) });
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
 
