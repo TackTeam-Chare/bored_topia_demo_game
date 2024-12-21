@@ -168,12 +168,13 @@ export class ClickerGame extends Scene {
 
     dropCoin() {
         if (this.isGameOver) return;
-
-    const dispenserX = this.scale.width / 2; // ตำแหน่งตรงกลางจอ
-    const dispenserY = this.scale.height * 0.3; // ปรับตามสัดส่วนจอ
-
-    const x = dispenserX + Phaser.Math.Between(-50, 50);
-    const y = dispenserY + Phaser.Math.Between(-20, 20);
+    
+        const dispenserX = this.scale.width / 2;
+        const dispenserY = this.scale.height * 0.3;
+    
+        const x = dispenserX + Phaser.Math.Between(-50, 50);
+        const y = dispenserY + Phaser.Math.Between(-20, 20);
+        
         const coinTypes = [{
                 key: 'coinBonze',
                 rotateAnim: 'Bonze_rotate',
@@ -217,39 +218,43 @@ export class ClickerGame extends Scene {
                 weight: 2
             }
         ];
-
+    
         const randomCoinType = this.weightedRandom(coinTypes);
         const coin = this.physics.add.sprite(x, y, randomCoinType.key).play(randomCoinType.rotateAnim);
-
-      
-        
-         // ปรับขนาดเหรียญให้เหมาะสมกับหน้าจอ
-        const coinScale = this.scale.width < 768 ? 2.5 : 1.9; // ถ้าหน้าจอแคบให้ขนาดใหญ่ขึ้น
-        coin.setScale(coinScale);
-
-    // เพิ่ม Hit Area สำหรับมือถือ
-         coin.setInteractive({ useHandCursor: true, hitArea: new Phaser.Geom.Circle(0, 0, 60) });
+    
+        // ปรับขนาดเหรียญให้ใหญ่ขึ้น
+        const baseScale = this.scale.width < 768 ? 3.2 : 2.5; // เพิ่มขนาดเหรียญทั้งบนมือถือและเดสก์ท็อป
+        coin.setScale(baseScale);
+    
+        // เพิ่มพื้นที่การคลิก/แตะให้ใหญ่ขึ้น
+        const hitAreaSize = 80; // เพิ่มขนาดพื้นที่การคลิก
+        coin.setInteractive({ 
+            useHandCursor: true,
+            hitArea: new Phaser.Geom.Circle(0, 0, hitAreaSize),
+            hitAreaCallback: Phaser.Geom.Circle.Contains
+        });
+    
         const angle = Phaser.Math.Between(0, 360);
         const speed = Phaser.Math.Between(200, 400);
-
+    
         const velocityX = speed * Math.cos(Phaser.Math.DegToRad(angle));
         const velocityY = Phaser.Math.Between(300, 400);
-
+    
         coin.body.setVelocity(velocityX, velocityY);
         coin.setCollideWorldBounds(true);
         coin.setBounce(0);
-
+    
         coin.body.onWorldBounds = true;
         this.physics.world.on('worldbounds', (body) => {
             if (body.gameObject === coin && body.blocked.down) {
                 coin.destroy();
             }
         });
-
+    
         this.time.delayedCall(100, () => {
             coin.setInteractive();
         });
-
+    
         coin.coinType = randomCoinType;
         this.coins.push(coin);
     }
@@ -296,8 +301,8 @@ export class ClickerGame extends Scene {
 
         // Applying the score multiplier based on the tokenBalance
         let scoreMultiplier = 1;
-        if (this.tokenBalance && parseFloat(this.tokenBalance) > 0) {
-            scoreMultiplier = parseFloat(this.tokenBalance); // Use tokenBalance as a multiplier
+        if (this.tokenBalance && Number.parseFloat(this.tokenBalance) > 0) {
+            scoreMultiplier = Number.parseFloat(this.tokenBalance); // Use tokenBalance as a multiplier
         }
 
         // Calculate final score by applying tokenBalance and existing score multiplier
@@ -326,6 +331,7 @@ export class ClickerGame extends Scene {
             onComplete: () => scoreText.destroy()
         });
 
+        // biome-ignore lint/style/useTemplate: <explanation>
         coin.once('animationcomplete-' + coin.coinType.vanishAnim, () => coin.destroy());
 
         // Add the calculated final score to the overall game score
@@ -358,6 +364,7 @@ export class ClickerGame extends Scene {
     gameOver() {
         this.isGameOver = true;
         console.log(`Game over. Final score: ${this.score}, Room ID: ${this.roomId}`);
+        // biome-ignore lint/complexity/noForEach: <explanation>
         this.coins.forEach(coin => {
             if (coin.active) {
                 coin.body.setVelocity(0, 0); // Fix the velocity method
@@ -401,7 +408,8 @@ export class ClickerGame extends Scene {
         }
     
         // ตรวจสอบว่า score เป็นตัวเลขที่ไม่ติดลบ
-        if (isNaN(score) || score < 0) {
+        // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
+                    if (isNaN(score) || score < 0) {
             console.error('Invalid score value:', score);
             alert('Score must be a non-negative number.');
             return;

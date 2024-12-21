@@ -49,7 +49,8 @@ export class HallOfFame extends Phaser.Scene {
         this.load.image('scrollBar', 'assets/ui/background/button_scroll_bar.svg');
 
         // Load rank images
-        this.rankImages.forEach(img => {
+        // biome-ignore lint/complexity/noForEach: <explanation>
+                this.rankImages.forEach(img => {
             this.load.image(img, `assets/ui/background/${img}.png`);
         });
     }
@@ -219,6 +220,7 @@ export class HallOfFame extends Phaser.Scene {
 
     // Clear previous player display
     clearPlayerDisplay() {
+        // biome-ignore lint/complexity/noForEach: <explanation>
         this.playerTexts.forEach(text => text.destroy());
         this.playerTexts = [];
     }
