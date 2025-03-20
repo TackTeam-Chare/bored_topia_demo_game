@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@phaser.io>
- * @copyright    2013-2024 Phaser Studio Inc.
+ * @copyright    2013-2025 Phaser Studio Inc.
  * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
@@ -362,7 +362,7 @@ var Animation = new Class({
         //  When is the first update due?
         state.accumulator = 0;
 
-        state.nextTick = (state.currentFrame.duration) ? state.currentFrame.duration : state.msPerFrame;
+        state.nextTick = state.msPerFrame || state.currentFrame.duration;
     },
 
     /**
@@ -515,7 +515,7 @@ var Animation = new Class({
     {
         state.accumulator -= state.nextTick;
 
-        state.nextTick = (state.currentFrame.duration) ? state.currentFrame.duration : state.msPerFrame;
+        state.nextTick = state.msPerFrame || state.currentFrame.duration;
     },
 
     /**

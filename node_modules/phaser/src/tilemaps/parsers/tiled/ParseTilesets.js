@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@phaser.io>
- * @copyright    2013-2024 Phaser Studio Inc.
+ * @copyright    2013-2025 Phaser Studio Inc.
  * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
@@ -164,7 +164,9 @@ var ParseTilesets = function (json)
                 var image = tile.image;
                 var tileId = parseInt(tile.id, 10);
                 var gid = set.firstgid + tileId;
-                newCollection.addImage(gid, image);
+                var width = tile.imagewidth;
+                var height = tile.imageheight;
+                newCollection.addImage(gid, image, width, height);
 
                 maxId = Math.max(tileId, maxId);
             }

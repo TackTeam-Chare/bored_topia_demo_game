@@ -278,6 +278,8 @@ export interface Filter {
 	readonly filter?: FilterOption;
 }
 
+export type FilterParams = Omit<Filter, 'blockHash' | 'filter'>;
+
 export interface AccessListEntry {
 	readonly address?: Address;
 	readonly storageKeys?: HexString32Bytes[];
@@ -515,7 +517,7 @@ export type Block = BlockBase<
 
 export interface FeeHistoryBase<NumberType> {
 	readonly oldestBlock: NumberType;
-	readonly baseFeePerGas: NumberType;
+	readonly baseFeePerGas: NumberType[];
 	readonly reward: NumberType[][];
 	readonly gasUsedRatio: NumberType[];
 }

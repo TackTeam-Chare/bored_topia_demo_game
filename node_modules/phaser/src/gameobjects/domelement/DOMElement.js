@@ -1,6 +1,6 @@
 /**
  * @author       Richard Davey <rich@phaser.io>
- * @copyright    2013-2024 Phaser Studio Inc.
+ * @copyright    2013-2025 Phaser Studio Inc.
  * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
@@ -780,9 +780,8 @@ var DOMElement = new Class({
     },
 
     /**
-     * Internal method that calls `getBoundingClientRect` on the `node` and then sets the bounds width
-     * and height into the `displayWidth` and `displayHeight` properties, and the `clientWidth` and `clientHeight`
-     * values into the `width` and `height` properties respectively.
+     * Internal method that sets the `displayWidth` and `displayHeight` properties, and the `clientWidth` 
+     * and `clientHeight` values into the `width` and `height` properties respectively.
      *
      * This is called automatically whenever a new element is created or set.
      *
@@ -795,13 +794,11 @@ var DOMElement = new Class({
     {
         var node = this.node;
 
-        var nodeBounds = node.getBoundingClientRect();
-
         this.width = node.clientWidth;
         this.height = node.clientHeight;
 
-        this.displayWidth = nodeBounds.width || 0;
-        this.displayHeight = nodeBounds.height || 0;
+        this.displayWidth = this.width * this.scaleX;
+        this.displayHeight = this.height * this.scaleY;
 
         return this;
     },
