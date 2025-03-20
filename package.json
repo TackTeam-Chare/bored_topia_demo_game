@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite preview",
+    "start": "chmod +x node_modules/.bin/vite && vite preview",
     "dev": "vite",
     "build": "chmod +x node_modules/.bin/vite && vite build",
     "preview": "vite preview",
